@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos de apoyo</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ... (Todos tus estilos CSS, líneas 15 a 166) ... */
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔵 DESVANECIDO AZUL */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65px;
+            width: 65px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+
+        .navbar .spacer { flex-grow: 1; }
+
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+        }
+
+        .auth-links a.dashboard-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 10;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: 'Times New Roman', serif;
+            font-weight: bold;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .content {
+            padding: 20px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: white;
+            width: 300px;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .initial-circle {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #A0C4FF;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin: 4px 0;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #555;
+            margin: 6px 0 12px 0;
+        }
+
+        .join-btn {
+            background: #A0C4FF;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .join-btn:hover {
+            opacity: 0.85;
+        }
+
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: auto;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        /* 🔵 DESVANECIDO AZUL */
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+            const links = document.querySelectorAll("a[href]");
+
+            links.forEach(link => {
+                if (
+                    link.getAttribute("href").startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) return;
+
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+<div class="fade-overlay" id="fadeOverlay"></div>
+
+<div class="navbar">
+    <button class="menu-btn" onclick="openMenu()">☰</button>
+
+    <div class="logo-container">
+        <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img" alt="logo tranquil connect"/>
+        <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="auth-links">
+        <div th:if="${usuario}" style="display:flex; align-items:center;">
+            
+            <div th:if="${usuario.rol == 'ADMIN'}">
+                <a th:href="@{/dashboard}" class="dashboard-btn">
+                    <i class="fas fa-users-cog"></i> Dashboard
+                </a>
+            </div>
+
+            <span style="color:white;font-weight:bold;font-size:16px;margin-right:10px;">
+                Hola, <span th:text="${usuario.nombre}">Usuario</span>!
+            </span>
+
+            <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+        </div>
+
+        <div th:unless="${usuario}">
+            <a th:href="@{/login}">Iniciar Sesión</a>
+            <a th:href="@{/registro}">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+<div id="sideMenu" class="side-menu">
+    <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+    <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢𝐨</a>
+    <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+    <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+    <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+    <a th:href="@{/desempeño}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+</div>
+
+<div class="content">
+    <h1 style="margin-top:25px;">💬 Grupos de apoyo</h1>
+
+    <div class="cards-container">
+        <div class="card" th:each="grupo : ${listaDeGrupos}">
+            <div class="initial-circle" th:text="${#strings.substring(grupo.nombre,0,1)}">I</div>
+            <h3 th:text="${grupo.nombre}">Nombre</h3>
+            <p th:text="${grupo.descripcion}">Descripción</p>
+
+            <a th:href="@{/chat(id=${grupo.idGrupo})}"
+                class="join-btn"
+                style="text-decoration:none;display:block;text-align:center;">
+                Unirse / Ir al Chat
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p style="margin:0;">2025 Tranquil Connect todos los derechos reservados</p>
+</footer>
+
+</body>
+</html>
