@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Grupos - Tranquil Connect</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <style>
+        /* --- ESTILOS COMPARTIDOS --- */
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 1; 
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.loaded {
+            opacity: 0;
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img-nav {
+            height: 40px;
+            width: 40px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .auth-links a.home-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+        }
+
+        .auth-links a.home-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #c44949;
+        }
+
+        .auth-links a.logout-btn:hover {
+            background-color: #9c3a3a;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* --- ESTILOS DE TABLA --- */
+        .content-wrapper {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        .content-wrapper h1 {
+            color: #4975d4;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-top: 20px;
+            padding: 0 0 10px 0;
+        }
+
+        .groups-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .groups-table th, .groups-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .groups-table th {
+            background-color: #A0C4FF;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+        }
+
+        .groups-table tr:hover {
+            background-color: #eef4ff;
+        }
+
+        .action-btn {
+            background-color: #4975d4;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s;
+            margin: 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .delete-btn {
+            background-color: #c44949;
+        }
+
+        .delete-btn:hover {
+            background-color: #9c3a3a;
+        }
+
+        .create-btn {
+            background-color: #38b000;
+            padding: 10px 15px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .create-btn:hover {
+            background-color: #2b8c00;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .status-activo {
+            background-color: #38b000;
+            color: white;
+        }
+
+        .status-cerrado {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .status-pendiente {
+            background-color: #ffcc00;
+            color: #333;
+        }
+
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: auto;
+        }
+
+        /* ======================== ESTILOS DE REPORTES Y FILTROS ======================== */
+        .report-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #eef4ff;
+            border-radius: 8px;
+            border: 1px solid #A0C4FF;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 5px;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        .search-form input, .multi-filters select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            flex-grow: 1;
+        }
+
+        .search-form button, .search-form a.btn {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-search {
+            background-color: #4975d4;
+        }
+
+        .btn-search:hover {
+            background-color: #395aa8;
+        }
+
+        .btn-clear {
+            background-color: #95a5a6;
+        }
+
+        .btn-clear:hover {
+            background-color: #7f8c8d;
+        }
+
+        .multi-filters {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .multi-filters label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        @media (max-width: 992px) {
+            .report-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form {
+                max-width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .multi-filters {
+                width: 100%;
+                justify-content: space-around;
+            }
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        function applyFilters() {
+            const keyword = document.querySelector('.search-form input[name="keyword"]').value;
+            let url = `/dashboard/grupos?`; 
+            if (keyword) url += `keyword=${keyword}&`;
+            if (url.endsWith('&')) url = url.slice(0, -1);
+            window.location.href = url;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+            
+            if (overlay) {
+                setTimeout(() => {
+                    overlay.classList.add("loaded");
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 400);
+                }, 50);
+            }
+
+            const links = document.querySelectorAll("a[href]");
+            links.forEach(link => {
+                if (link.getAttribute("href").startsWith("javascript") || link.getAttribute("target") === "_blank") return;
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.style.display = 'block';
+                    overlay.classList.remove("loaded");
+                    overlay.classList.add("active");
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img-nav" alt="Logo">
+            <span style="font-size: 24px; font-weight: bold;">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+            <div th:if="${usuario}" style="display:flex; align-items:center;">
+                <a th:href="@{/index}" class="home-btn">
+                    <i class="fas fa-home"></i> Volver al Inicio
+                </a>
+                <span style="color: white; font-weight: 600; margin-right: 10px;">
+                    Administrador, <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+                <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/dashboard}">🏠 Dashboard Principal</a>
+        <a th:href="@{/usuarios}">👥 Gestión de Usuarios</a>
+        <a th:href="@{/dashboard/grupos}">🧑‍🤝‍🧑 Gestión de Grupos</a>
+        <a th:href="@{/dashboard/foros}">💬 Moderación de Foros</a>
+        <hr style="border-color: rgba(255,255,255,0.2); margin: 15px 0;">
+        <a th:href="@{/index}">⬅️ Volver al Inicio (Público)</a>
+    </div>
+
+    <div class="content-wrapper">
+        <h1>🧑‍🤝‍🧑 Gestión de Grupos de Apoyo</h1>
+        <p>Administra los grupos, sus miembros y la información relevante.</p>
+
+        <div th:if="${mensaje}" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: left;">
+            <p th:text="${mensaje}"></p>
+        </div>
+
+        <div th:if="${error}" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: left;">
+            <p th:text="${error}"></p>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a th:href="@{/dashboard/grupos/nuevo}" class="action-btn create-btn">
+                <i class="fas fa-plus-circle"></i> Crear Nuevo Grupo
+            </a>
+        </div>
+
+        <div class="report-controls">
+            <form th:action="@{/dashboard/grupos}" method="get" class="search-form">
+                <input type="text" name="keyword" placeholder="Buscar por Nombre o Descripción..." th:value="${keyword}">
+                <button type="submit" class="btn btn-search">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a th:href="@{/dashboard/grupos}" class="btn btn-clear">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="groups-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Grupo</th>
+                        <th>Descripción</th>
+                        <th>Miembros (Total)</th>
+                        <th>Motivo Salida (Ejemplo)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="g : ${grupos}">
+                        <td th:text="${g.id_grupo}">101</td>
+                        <td th:text="${g.nombre}">Grupo de Programadores</td>
+                        <td th:text="${g.descripcion}">Desarrollo de Apps</td>
+                        <td th:text="${g.num_miembros}">15</td>
+                        <td th:text="${g.motivo_salida}">Ninguno</td>
+                        <td>
+                            <a th:href="@{/dashboard/grupos/editar/{id}(id=${g.id_grupo})}" class="action-btn">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a th:href="@{/dashboard/grupos/eliminar/{id}(id=${g.id_grupo})}" class="action-btn delete-btn"
+                                onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?');">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(grupos)}">
+                        <td colspan="6" style="text-align: center;">No se encontraron grupos que coincidan con los filtros.</td>
+                    </tr>
+
+                    <tr th:unless="${grupos}">
+                        <td>20</td>
+                        <td>hola</td>
+                        <td>hola</td>
+                        <td>1</td>
+                        <td>Ninguno</td>
+                        <td>
+                            <a href="#" class="action-btn"><i class="fas fa-edit"></i> Editar</a>
+                            <a href="#" class="action-btn delete-btn" onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?');"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2025 Tranquil Connect • Panel de Administración</p>
+    </footer>
+</body>
+</html>

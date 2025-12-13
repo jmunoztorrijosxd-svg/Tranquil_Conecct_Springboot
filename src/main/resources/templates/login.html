@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tranquil Connect - Iniciar Sesión</title>
+
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🌊 CAPA DE DESVANECIDO */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF; /* mismo color header/footer */
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .back-link {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .login-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h2 {
+            color: #4975d4;
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            border-color: #A0C4FF;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(160, 196, 255, 0.3);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #4975d4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background: #395aa8;
+        }
+
+        .links-auth {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .links-auth a {
+            color: #4975d4;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 10px;
+        }
+
+        .error-message {
+            color: #D32F2F;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: auto;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+
+            /* Transición para links */
+            document.querySelectorAll("a[href]").forEach(link => {
+                if (
+                    link.getAttribute("href").startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) return;
+
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+                });
+            });
+
+            /* 🔥 Transición para submit del login */
+            const form = document.querySelector("form");
+            if (form) {
+                form.addEventListener("submit", e => {
+                    e.preventDefault();
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        form.submit();
+                    }, 400);
+                });
+            }
+        });
+    </script>
+</head>
+
+<body>
+
+    <!-- CAPA DE DESVANECIDO -->
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="navbar">
+        <a th:href="@{/index}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+
+        <div class="spacer"></div>
+
+        <span style="font-size: 24px; font-weight: bold;">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+    </div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Iniciar Sesión</h2>
+
+            <div th:if="${param.registroExito}" class="success-message">
+                ✅ ¡Registro exitoso! Ya puedes iniciar sesión.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="input-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" name="username"required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div th:if="${param.error}" class="error-message">
+                    Credenciales inválidas.
+                </div>
+
+                <button type="submit" class="btn-login">Acceder</button>
+            </form>
+
+            <div class="links-auth">
+                <a th:href="@{/forgot_password}">¿Olvidaste tu contraseña?</a> |
+                <a th:href="@{/registro}">Registrarse</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2025 Tranquil Connect • Todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>

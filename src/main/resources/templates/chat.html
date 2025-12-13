@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Chat - ' + ${nombreGrupo}">Chat de Grupo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Estilos base de la página (Similar a Grupos/Desempeño) */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background-color: #f7f7f7; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+        }
+        
+        /* Navbar de Tranquil Connect (Azul: #A0C4FF) */
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .logo-img {
+            height: 40px; 
+            width: 40px;
+            margin-right: 10px;
+        }
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+        .navbar .spacer { flex-grow: 1; }
+        
+        /* --- Nuevo estilo para el botón de cerrar sesión --- */
+        .auth-links {
+             display: flex;
+             align-items: center;
+        }
+        .auth-links a.logout-btn {
+             background-color: #4975d4; 
+             color: white;
+             text-decoration: none;
+             font-size: 14px;
+             font-weight: bold;
+             padding: 6px 10px;
+             border-radius: 5px;
+             margin-left: 10px;
+             transition: background-color 0.2s;
+        }
+        .auth-links a.logout-btn:hover {
+            background-color: #3b5cb0;
+        }
+        /* -------------------------------------------------- */
+
+
+        /* Contenedor Principal para limitar el ancho del chat */
+        .main-content {
+            flex-grow: 1;
+            display: flex; 
+            justify-content: center;
+            padding: 20px 0; 
+        }
+
+        .chat-container {
+            max-width: 800px; 
+            width: 100%; 
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: white; 
+            height: 100%; 
+        }
+        
+        /* Encabezado específico del chat */
+        .chat-specific-header {
+            background-color: #A0C4FF; 
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0; 
+        }
+        .chat-specific-header h2 {
+            margin: 0 0 0 15px;
+            font-size: 18px;
+            flex-grow: 1;
+        }
+        .chat-specific-header a {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+        }
+        .chat-specific-header a:hover {
+            opacity: 0.8;
+        }
+
+
+        /* Área de mensajes */
+        .message-area {
+            flex-grow: 1;
+            padding: 10px 15px;
+            overflow-y: auto;
+            background-color: #E6F0FF; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Estilos de burbuja de mensaje */
+        .message {
+            max-width: 70%;
+            margin: 8px 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            line-height: 1.4;
+            font-size: 15px;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+        }
+        
+        /* Mensajes Enviados (Derecha) - Azul */
+        .sent {
+            align-self: flex-end;
+            background-color: #6DA4FF; 
+            color: white; 
+            margin-left: auto;
+        }
+        .sent .message-info {
+            color: rgba(255, 255, 255, 0.7); 
+        }
+
+
+        /* Mensajes Recibidos (Izquierda) - Blanco */
+        .received {
+            align-self: flex-start;
+            background-color: white; 
+            color: #333;
+            margin-right: auto;
+        }
+
+        .message-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        /* Área de entrada de texto (Footer) */
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f2f5;
+            flex-shrink: 0; 
+        }
+        .input-area input {
+            flex-grow: 1;
+            padding: 12px 18px;
+            border-radius: 20px;
+            border: none;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .input-area button {
+            background-color: #A0C4FF; 
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.2s;
+        }
+        .input-area button:hover {
+            background-color: #79a8f4; 
+        }
+
+        /* Footer de Tranquil Connect */
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0; 
+        }
+    </style>
+
+    <script>
+        function enviarMensaje(event) {
+            event.preventDefault(); 
+            
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                const messageArea = document.getElementById('message-area');
+                const now = new Date();
+                const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+                const sentBubble = document.createElement('div');
+                sentBubble.className = 'message sent';
+                sentBubble.innerHTML = `${message}
+                    <div class="message-info">${timeString} <i class="fa-solid fa-check-double"></i></div>`;
+                
+                messageArea.appendChild(sentBubble);
+
+                input.value = '';
+                messageArea.scrollTop = messageArea.scrollHeight;
+                
+                setTimeout(() => {
+                    simularRespuesta(messageArea);
+                }, 1500);
+            }
+        }
+        
+        function simularRespuesta(messageArea) {
+             const timeString = new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+             const receivedBubble = document.createElement('div');
+             receivedBubble.className = 'message received';
+             receivedBubble.innerHTML = `Gracias por compartir ese mensaje. ¡Estamos aquí para apoyarte!
+                 <div class="message-info">${timeString}</div>`;
+             
+             messageArea.appendChild(receivedBubble);
+             messageArea.scrollTop = messageArea.scrollHeight;
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}"
+                 class="logo-img"
+                 alt="logo tranquil connect"/>
+            <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+        </div>
+
+        <div class="spacer"></div>
+        
+        <div class="auth-links" th:if="${usuario}">
+            <span style="color: white; font-weight: bold; font-size: 16px;">
+                Hola, <span th:text="${usuario.nombre}">Usuario</span>!
+            </span>
+            
+            <a th:href="@{/logout}" class="logout-btn">
+                Cerrar Sesión
+            </a>
+        </div>
+        <div class="auth-links" th:unless="${usuario}">
+             <a th:href="@{/login}" class="logout-btn" style="background-color: #6da4ff;">Iniciar Sesión</a>
+        </div>
+        </div>
+
+    <div class="main-content">
+        <div class="chat-container">
+
+            <div class="chat-specific-header">
+                <a th:href="@{/grupos}" title="Volver a Grupos"><i class="fa-solid fa-arrow-left"></i></a>
+                <h2 th:text="${nombreGrupo}">Nombre del Grupo</h2> 
+            </div>
+
+            <div class="message-area" id="message-area">
+                <div class="message received">
+                    ¡Hola a todos! Este es un espacio seguro para compartir.
+                    <div class="message-info">10:00</div>
+                </div>
+                
+                <div class="message received">
+                    Bienvenido/a al chat, <span th:text="${usuario.nombre}">Usuario</span>!
+                    <div class="message-info">10:01</div>
+                </div>
+
+                <div class="message sent">
+                    Me alegra estar aquí. Necesito apoyo con mi ansiedad esta semana.
+                    <div class="message-info">10:05 <i class="fa-solid fa-check-double"></i></div>
+                </div>
+                
+                <div class="message received">
+                    Entendido. Te escuchamos. ¿Cómo podemos ayudarte?
+                    <div class="message-info">10:06</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <form onsubmit="enviarMensaje(event)" style="display: flex; width: 100%;">
+                    <input type="text" id="message-input" placeholder="Escribe un mensaje..." required>
+                    <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p style="margin:0; text-align:center;">2025 Tranquil Connect todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>

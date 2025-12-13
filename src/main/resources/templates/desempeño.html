@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desempeño - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Estilos base (Mantenidos) */
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65px;
+            width: 65px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+
+        .navbar .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .auth-links a.dashboard-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 10;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: 'Times New Roman', serif;
+            font-weight: bold;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .content {
+            flex: 1;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .chart-container {
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notes {
+            width: 90%;
+            max-width: 650px;
+            margin: 30px auto;
+            text-align: left;
+        }
+
+        .note-card {
+            background: white;
+            padding: 15px;
+            border-left: 5px solid #A0C4FF;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .note-card h4 {
+            margin: 0 0 6px 0;
+        }
+
+        .note-card p {
+            margin: 0;
+            font-size: 15px;
+            color: #444;
+        }
+
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* ===== TRANSICIÓN DE REDIRECCIONAMIENTO (AGREGADO) ===== */
+        .page-transition {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 9999;
+        }
+
+        .page-transition.active {
+            opacity: 1;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div id="pageTransition" class="page-transition"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()">☰</button>
+
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img" alt="logo"/>
+            <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+
+            <div th:if="${usuario}" style="display:flex; align-items:center;">
+                <div th:if="${usuario.rol == 'ADMIN'}">
+                    <a th:href="@{/dashboard}" class="dashboard-btn">
+                        <i class="fas fa-users-cog"></i> Dashboard
+                    </a>
+                </div>
+
+                <span style="color: white; font-weight: bold; font-size: 16px; margin-right: 10px;">
+                    Hola, <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+
+                <a th:href="@{/logout}" class="logout-btn">
+                    Cerrar Sesión
+                </a>
+            </div>
+
+            <div th:unless="${usuario}">
+                <a th:href="@{/login}">Iniciar Sesión</a>
+                <a th:href="@{/registro}">Registrarse</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢𝐨</a>
+        <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+        <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+        <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+        <a th:href="@{/desempeño}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+    </div>
+
+    <div class="content">
+        <h1>📈 Tu progreso emocional</h1>
+        <p>Aquí puedes ver tu evolución durante las semanas 💙</p>
+
+        <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+
+    <section class="notes">
+        <h2>🗒️ Anotaciones de Psicólogos</h2>
+
+        <div class="note-card">
+            <h4>Lic. Ana Pérez</h4>
+            <p>
+                El paciente ha mostrado mayor control de respiración en momentos de ansiedad.
+                Continuar con ejercicios meditativos 3 veces por semana.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h4>Lic. Carlos Ramírez</h4>
+            <p>
+                Incremento notable en participación social en grupos de apoyo.
+                Se recomienda iniciar actividades que fortalezcan autoestima.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h4>Lic. Laura Gómez</h4>
+            <p>
+                Buen manejo emocional en sesiones, apertura para dialogar.
+                Seguir registrando pensamientos diarios en la app.
+            </p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p style="margin:0;">2025 Tranquil Connect todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        const ctx = document.getElementById('progressChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [
+                    'Semana 1',
+                    'Semana 2',
+                    'Semana 3',
+                    'Semana 4',
+                    'Semana 5',
+                    'Semana 6'
+                ],
+                datasets: [{
+                    label: 'Nivel de bienestar',
+                    data: [30, 45, 50, 65, 70, 85],
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false,
+                    borderColor: '#4975d4',
+                    backgroundColor: 'rgba(73, 117, 212, 0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Evolución del Bienestar Semanal'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Nivel de Bienestar (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Semanas'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("pageTransition");
+
+            document.querySelectorAll("a[href]").forEach(link => {
+                const href = link.getAttribute("href");
+
+                if (
+                    href &&
+                    !href.startsWith("#") &&
+                    !href.startsWith("javascript")
+                ) {
+                    link.addEventListener("click", e => {
+                        e.preventDefault();
+                        overlay.classList.add("active");
+
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 400);
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

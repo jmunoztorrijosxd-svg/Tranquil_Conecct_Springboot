@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tranquil Connect</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔵 CAPA AZUL DE TRANSICIÓN */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF; /* mismo color footer/header */
+            opacity: 1; /* Inicia visible para el fade-in */
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.loaded {
+            opacity: 0; /* Desaparece al cargar */
+        }
+
+        .fade-overlay.active {
+            opacity: 1; /* Vuelve a aparecer para el fade-out en la navegación */
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.logout-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-links a.dashboard-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .side-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .side-menu .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+        }
+
+        .content {
+            padding: 25px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 900px;
+            justify-items: center;
+            margin-top: 10px;
+        }
+
+        .card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon {
+            height: 55px;
+            width: 55px;
+            background: #A0C4FF;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 24px;
+            margin: 0 auto 10px;
+        }
+
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: auto;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        /* 🔵 TRANSICIÓN AZUL CORRECTA Y FADE-IN AL CARGAR */
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+
+            // 1. Ocultar la capa azul (fade-in) cuando la página carga
+            if (overlay) {
+                setTimeout(() => {
+                    overlay.classList.add("loaded");
+
+                    // Quitamos display:none después de la transición para evitar interferencias
+                    setTimeout(() => {
+                        overlay.style.display = "none";
+                    }, 400);
+                }, 50);
+            }
+
+            // 2. Controlar la transición (fade-out) al hacer clic en un enlace
+            const links = document.querySelectorAll("a[href]");
+
+            links.forEach(link => {
+                if (
+                    link.getAttribute("href").startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) {
+                    return;
+                }
+
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.style.display = "block";
+                    overlay.classList.remove("loaded");
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="logo-container">
+            <img
+                th:src="@{/tranquil_connect_new_logo.png}"
+                style="height: 40px; width: 40px; margin-right:10px; border-radius: 50%;"
+                alt="Logo"
+            >
+            <span style="font-size: 24px; font-weight: bold;">
+                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
+            </span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+            <div th:if="${usuario}" style="display:flex; align-items:center;">
+
+                <a
+                    th:if="${usuario.rol == 'ADMIN'}"
+                    th:href="@{/dashboard}"
+                    class="dashboard-btn"
+                >
+                    <i class="fas fa-users-cog"></i> Dashboard
+                </a>
+
+                <span style="color: white; font-weight: 600; margin-right: 10px;">
+                    Hola, <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+
+                <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+            </div>
+
+            <div th:unless="${usuario}">
+                <a th:href="@{/login}">Iniciar Sesión</a>
+                <a th:href="@{/registro}">Registrarse</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢𝐨</a>
+        <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+        <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+        <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+        <a th:href="@{/desempeño}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+    </div>
+
+    <div class="content">
+        <section style="margin-bottom:40px;">
+            <h1 style="color:#4975d4;">Bienvenido a Tranquil Connect 💙</h1>
+            <p>Un espacio seguro para conectar, sanar y crecer 🌿</p>
+        </section>
+
+        <div class="cards-container">
+            <a th:href="@{/agendar}" class="card">
+                <div class="icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Agenda tu cita</h3>
+                <p>Con profesionales dispuestos a escucharte.</p>
+            </a>
+
+            <a th:href="@{/forosocial}" class="card">
+                <div class="icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h3>Foro social</h3>
+                <p>Comparte, reacciona y encuentra apoyo.</p>
+            </a>
+
+            <a th:href="@{/grupos}" class="card">
+                <div class="icon">
+                    <i class="fas fa-people-group"></i>
+                </div>
+                <h3>Grupos de apoyo</h3>
+                <p>Únete a comunidades que te entienden.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2025 Tranquil Connect • Todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>

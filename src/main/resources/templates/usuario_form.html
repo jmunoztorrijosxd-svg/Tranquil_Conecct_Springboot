@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}"></title> 
+    
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <style>
+        /* (Debes pegar aquí los estilos compartidos del navbar, menu, y footer de usuarios.html) */
+        
+        /* --- ESTILOS DEL FORMULARIO --- */
+        .content-wrapper {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .form-card h1 {
+            color: #4975d4;
+            border-bottom: 2px solid #A0C4FF;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .form-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-actions .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-guardar {
+            background-color: #4975d4;
+            color: white;
+        }
+        .btn-guardar:hover {
+            background-color: #395aa8;
+        }
+
+        .btn-cancelar {
+            background-color: #ccc;
+            color: #333;
+        }
+        .btn-cancelar:hover {
+            background-color: #bbb;
+        }
+    </style>
+    </head>
+<body>
+    
+    <div class="content-wrapper">
+        <div class="form-card">
+            <h1 th:text="${titulo}">Crear/Editar Usuario</h1>
+            
+            <form th:action="@{/usuarios/guardar}" th:object="${usuarioAEditar}" method="post">
+                
+                <input type="hidden" th:field="*{id}">
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico:</label>
+                    <input type="email" id="correo" th:field="*{correo}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" th:field="*{telefono}">
+                </div>
+
+                <div class="form-group">
+                    <label for="genero">Género:</label>
+                    <select id="genero" th:field="*{genero}">
+                        <option value="">Seleccione...</option> 
+                        <option value="Femenino">Femenino</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="No_binario">No Binario / Otro</option>
+                        <option value="n/a">Prefiero no decir</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="rol">Rol:</label>
+                    <select id="rol" th:field="*{rol}" required>
+                        <option value="USUARIO">USUARIO</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/usuarios}" class="btn btn-cancelar">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </body>
+</html>

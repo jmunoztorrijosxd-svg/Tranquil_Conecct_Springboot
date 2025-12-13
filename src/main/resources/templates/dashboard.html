@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Administración - Tranquil Connect</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <style>
+        /* --- ESTILOS COMPARTIDOS (Navbar, Side Menu, Footer) --- */
+        html, body {
+            height: 100%;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔵 CAPA AZUL DE TRANSICIÓN */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 1; 
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.loaded {
+            opacity: 0; /* Desaparece al cargar */
+        }
+        
+        .fade-overlay.active {
+            opacity: 1; /* Aparece al navegar */
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        /* 🚨 NUEVO ESTILO para el botón de inicio */
+        .auth-links a.home-btn {
+            background-color: #4975d4; /* Color azul, destacando */
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-links a.home-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #c44949; /* Rojo para cerrar sesión */
+        }
+
+        .auth-links a.logout-btn:hover {
+            background-color: #9c3a3a;
+        }
+
+        /* Estilos del Side Menu */
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* --- ESTILOS ESPECÍFICOS DEL DASHBOARD --- */
+        .dashboard-container {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        .dashboard-container h1 {
+             color:#4975d4;
+             margin-bottom: 5px;
+        }
+
+        .dashboard-container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: left;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .dashboard-card h3 {
+            color: #4975d4;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-card .card-action {
+             background-color: #A0C4FF;
+             color: white;
+             padding: 10px 15px;
+             text-decoration: none;
+             border-radius: 5px;
+             display: inline-block;
+             margin-top: 15px;
+             font-weight: 600;
+             transition: background-color 0.2s;
+        }
+
+        .dashboard-card .card-action:hover {
+             background-color: #4975d4;
+        }
+
+
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: auto;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        /* 🔵 TRANSICIÓN AZUL */
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+            
+            // 1. Ocultar la capa azul (fade-in) cuando la página carga
+            if (overlay) {
+                setTimeout(() => {
+                    overlay.classList.add("loaded"); 
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 400); 
+                }, 50); 
+            }
+
+            // 2. Controlar la transición (fade-out) al hacer clic en un enlace
+            const links = document.querySelectorAll("a[href]");
+
+            links.forEach(link => {
+                if (
+                    link.getAttribute("href").startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) return;
+
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.style.display = 'block'; 
+                    overlay.classList.remove("loaded"); 
+                    overlay.classList.add("active"); 
+
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}" style="height: 40px; width: 40px; margin-right:10px; border-radius: 50%;" alt="Logo">
+            <span style="font-size: 24px; font-weight: bold;">
+                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
+            </span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+            <div th:if="${usuario}" style="display:flex; align-items:center;">
+                
+                <a th:href="@{/index}" class="home-btn">
+                    <i class="fas fa-home"></i> Volver al Inicio
+                </a>
+                
+                <span style="color: white; font-weight: 600; margin-right: 10px;">
+                    Administrador, <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+
+                <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/dashboard}">🏠 Dashboard Principal</a>
+        <a th:href="@{/usuarios}">👥 Gestión de Usuarios</a>
+        <a th:href="@{/dashboard/citas}">Gestion de grupos</a>
+        <a th:href="@{/gruposcrud}">💬 Moderación de Foros</a>
+        <hr style="border-color: rgba(255,255,255,0.2); margin: 15px 0;">
+        <a th:href="@{/index}">⬅️ Volver al Inicio (Público)</a>
+    </div>
+
+    <div class="dashboard-container">
+        <h1>Panel de Administración</h1>
+        <p>Bienvenido al área de gestión. Utiliza los módulos de abajo o el menú lateral para navegar.</p>
+
+        <div class="dashboard-grid">
+            
+            <div class="dashboard-card">
+                <h3><i class="fas fa-user-friends"></i> Gestión de Usuarios</h3>
+                <p>Ver, editar y eliminar cuentas de usuario. Asignar roles (Admin/Usuario).</p>
+                <a th:href="@{/usuarios}" class="card-action">Ir a Usuarios</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3><i class="fas fa-calendar-check"></i> Gestión de Grupos</h3>
+                <p>Monitorea y gestiona todas los grupos que han sido creados.</p>
+                <a th:href="@{/gruposcrud}" class="card-action">Revisar Grupos</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3><i class="fas fa-comments"></i> Moderación de Foros</h3>
+                <p>Modera publicaciones, comentarios y asegura el cumplimiento de normas.</p>
+                <a th:href="@{/dashboard/foros}" class="card-action">Moderar Contenido</a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2025 Tranquil Connect • Panel de Administración</p>
+    </footer>
+</body>
+</html>

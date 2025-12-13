@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Estilos de Transición de Página */
+        .page-transition {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 0; /* Invisible por defecto */
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            z-index: 9999;
+        }
+
+        .page-transition.active,
+        .page-transition.is-loading {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Estilos Globales y Layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65px; 
+            width: 65px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+
+        .navbar .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .auth-links a.dashboard-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 10;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: "Times New Roman", serif;
+            font-weight: bold;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Contenido */
+        .content {
+            padding: 25px;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Secciones Fade */
+        .fade-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            width: 100%;
+        }
+
+        .fade-section.show {
+            opacity: 1;
+        }
+
+        .cards-container {
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        #cards-section.fade-section.show {
+            display: flex;
+        }
+
+        #calendario-section.fade-section.show {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            width: 270px;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .card img {
+            height: 85px;
+            width: 85px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+        }
+
+        .agenda-btn {
+            background: #A0C4FF;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .agenda-btn:hover {
+            opacity: 0.85;
+        }
+
+        .calendar-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 320px;
+            margin: 30px auto;
+        }
+
+        .calendar-card input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #A0C4FF;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .confirm-btn {
+            background: #A0C4FF;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .confirm-btn:hover {
+            opacity: 0.85;
+        }
+
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        function mostrarCalendario() {
+            document.getElementById("cards-section").classList.remove("show");
+            setTimeout(() => {
+                document.getElementById("calendario-section").classList.add("show");
+            }, 50); 
+        }
+
+        function mostrarCards() {
+            document.getElementById("calendario-section").classList.remove("show");
+            setTimeout(() => {
+                document.getElementById("cards-section").classList.add("show");
+            }, 50); 
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.querySelector(".page-transition");
+
+            if (overlay) {
+                setTimeout(() => {
+                    overlay.classList.remove("is-loading");
+                }, 100); 
+            }
+
+            document.querySelectorAll("a[href]").forEach(link => {
+                const href = link.getAttribute("href");
+
+                if (
+                    href &&
+                    !href.startsWith("#") &&
+                    !href.startsWith("javascript") &&
+                    !link.hasAttribute("target") &&
+                    !link.hasAttribute("onclick") 
+                ) {
+                    link.addEventListener("click", e => {
+                        e.preventDefault();
+                        if (overlay) {
+                            overlay.classList.add("active");
+                            setTimeout(() => {
+                                window.location.href = link.href;
+                            }, 350); 
+                        } else {
+                            window.location.href = link.href;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="page-transition is-loading"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()">☰</button>
+
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img" alt="logo"/>
+            <span class="logo-text">
+                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
+            </span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+            <div th:if="${usuario}" style="display:flex;align-items:center;">
+                <div th:if="${usuario.rol == 'ADMIN'}">
+                    <a th:href="@{/dashboard}" class="dashboard-btn">
+                        <i class="fas fa-users-cog"></i> Dashboard
+                    </a>
+                </div>
+
+                <span style="color:white;font-weight:bold;margin-right:10px;">
+                    Hola, <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+
+                <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+            </div>
+
+            <div th:unless="${usuario}">
+                <a th:href="@{/login}">Iniciar Sesión</a>
+                <a th:href="@{/registro}">Registrarse</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢𝐨</a>
+        <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+        <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+        <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+        <a th:href="@{/desempeño}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞ñ𝐨</a>
+    </div>
+
+    <div class="content">
+        <h2>Encuentra a tu especialista</h2>
+
+        <div id="cards-section" class="cards-container fade-section show">
+            <div class="card" th:each="psicologo : ${psicologos}">
+                <img src="https://i.pravatar.cc/100?img=12" alt="Avatar Psicólogo">
+                <h3 th:text="${psicologo.nombre}">Nombre del Psicólogo</h3>
+                <p th:text="${psicologo.especialidad}">Especialidad</p>
+                <button class="agenda-btn" onclick="mostrarCalendario()">Agendar Sesión</button>
+            </div>
+        </div>
+
+        <div id="calendario-section" class="fade-section">
+            <div class="calendar-card">
+                <h2>📆 Selecciona la fecha</h2>
+                <input type="date">
+                <button class="confirm-btn">Confirmar fecha</button>
+                <button class="confirm-btn" onclick="mostrarCards()">⬅ Volver a Especialistas</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        2025 Tranquil Connect todos los derechos reservados
+    </footer>
+
+</body>
+</html>
+
