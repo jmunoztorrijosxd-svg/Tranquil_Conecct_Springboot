@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tranquil Connect - Registro</title>
+    <title>Tranquil Connect - Registro Profesional</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        /* Estilos Base del Proyecto (sin cambios) */
+        /* Estilos base mantenidos */
         html, body {
             height: 100%;
             font-family: 'Inter', Arial, sans-serif;
@@ -20,7 +20,6 @@
             flex-direction: column;
         }
 
-        /* --- Estilos del Navbar (Header) --- */
         .navbar {
             background: #A0C4FF;
             color: white;
@@ -53,7 +52,6 @@
             flex-grow: 1;
         }
 
-        /* --- Estilos del Formulario de Registro --- */
         .register-container {
             flex: 1;
             display: flex;
@@ -68,15 +66,21 @@
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
         }
 
         .register-box h2 {
             color: #4975d4;
-            margin-bottom: 25px;
+            margin-bottom: 10px;
             font-size: 28px;
             font-weight: 700;
+        }
+
+        .register-box p.subtitle {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 14px;
         }
 
         .error-message {
@@ -86,31 +90,30 @@
             border-radius: 5px;
             margin-bottom: 20px;
             font-weight: 500;
-            text-align: center;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: left;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
             color: #475569;
         }
 
-        .input-group input, .input-group select {
+        .input-group input, .input-group select, .input-group textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
             box-sizing: border-box; 
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             border-color: #A0C4FF;
             outline: none;
             box-shadow: 0 0 0 3px rgba(160, 196, 255, 0.3);
@@ -134,26 +137,6 @@
             background: #395aa8;
         }
 
-        /* NUEVO BOTÓN */
-        .btn-psicologo {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: #4975d4;
-            border: 2px solid #4975d4;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn-psicologo:hover {
-            background: #4975d4;
-            color: white;
-        }
-
         .links-auth {
             margin-top: 20px;
             font-size: 14px;
@@ -172,20 +155,14 @@
             padding: 15px;
             margin-top: auto;
         }
-
-        .footer p {
-            margin: 0;
-            font-size: 14px;
-            font-weight: 500;
-        }
     </style>
 </head>
 
 <body>
 
     <div class="navbar">
-        <a th:href="@{/login}" class="back-link">
-            <i class="fas fa-arrow-left"></i> Iniciar Sesión
+        <a th:href="@{/registro}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Volver
         </a>
 
         <div class="spacer"></div>
@@ -197,65 +174,79 @@
 
     <div class="register-container">
         <div class="register-box">
-            <h2>Crear Cuenta</h2>
+            <h2>Registro Profesional</h2>
+            <p class="subtitle">Únete a nuestra red de especialistas en salud mental</p>
             
             <div th:if="${error}" class="error-message">
                 <p th:text="${error}"></p>
             </div>
 
-            <form th:action="@{/registro}" method="post" th:object="${usuario}"> 
+            <form th:action="@{/registro-psicologo}" method="post" th:object="${usuario}"> 
                 
                 <div class="input-group">
                     <label for="nombre">Nombre Completo</label>
-                    <input type="text" id="nombre" th:field="*{nombre}" placeholder="Tu Nombre" required>
+                    <input type="text" id="nombre" th:field="*{nombre}" placeholder="Ej: Dr. Juan Pérez" required>
                 </div>
 
                 <div class="input-group">
-                    <label for="correo">Correo Electrónico</label>
-                    <input type="email" id="correo" th:field="*{correo}" placeholder="tu.email@ejemplo.com" required>
+                    <label for="correo">Correo Institucional/Profesional</label>
+                    <input type="email" id="correo" th:field="*{correo}" placeholder="tu.nombre@clinica.com" required>
                 </div>
                 
                 <div class="input-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" th:field="*{password}" placeholder="Mínimo 8 caracteres" required>
+                    <input type="password" id="password" th:field="*{password}" placeholder="Crea una clave segura" required>
                 </div>
-                
+
                 <div class="input-group">
-                    <label for="telefono">Número de Teléfono</label>
-                    <input type="tel" id="telefono" th:field="*{telefono}" placeholder="Ej. 555-123-4567" required>
+                    <label for="telefono">Número de Teléfono / WhatsApp</label>
+                    <input type="tel" id="telefono" th:field="*{telefono}" placeholder="Ej: 3001234567" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="especialidad">Especialidad Clínica</label>
+                    <select id="especialidad" th:field="*{especialidad}" required>
+                        <option value="" disabled selected>Selecciona tu especialidad...</option>
+                        <option value="Psicología Clínica">Psicología Clínica</option>
+                        <option value="Cognitivo-Conductual">Terapia Cognitivo-Conductual</option>
+                        <option value="Infantil">Psicología Infantil y Juvenil</option>
+                        <option value="Neuropsicología">Neuropsicología</option>
+                        <option value="Familiar">Terapia Familiar/Pareja</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="tarjeta">Número de Tarjeta Profesional / Colegiatura</label>
+                    <input type="text" id="tarjeta" th:field="*{tarjetaProfesional}" placeholder="Ej: TP-987654-CO" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="experiencia">Resumen de Experiencia</label>
+                    <textarea id="experiencia" th:field="*{experiencia}" placeholder="Cuéntanos brevemente tu trayectoria..." rows="3"></textarea>
                 </div>
 
                 <div class="input-group">
                     <label for="genero">Género</label>
                     <select id="genero" th:field="*{genero}" required>
-                        <option value="" disabled selected>Selecciona tu género...</option> 
+                        <option value="" disabled selected>Selecciona...</option> 
                         <option value="femenino">Femenino</option>
                         <option value="masculino">Masculino</option>
-                        <option value="no_binario">No Binario</option> 
                         <option value="otro">Otro</option>
-                        <option value="prefiero_no_decir">Prefiero no decir</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-register">Registrarme</button>
-
-                 <!-- BOTÓN NUEVO REDIRIGIENDO -->
-                <a th:href="@{/registro-psicologo}">
-                    <button type="button" class="btn-psicologo">
-                        ¿Eres psicólogo?
-                    </button>
-                </a>
+                <button type="submit" class="btn-register">Enviar Solicitud</button>
 
             </form>
 
             <div class="links-auth">
-                <p>¿Ya tienes cuenta? <a th:href="@{/login}">Inicia Sesión aquí</a></p>
+                <p>¿Ya eres parte? <a th:href="@{/login}">Inicia Sesión</a></p>
             </div>
         </div>
     </div>
 
     <footer class="footer">
-        <p>2025 Tranquil Connect • Todos los derechos reservados</p>
+        <p>2025 Tranquil Connect • Panel de Profesionales</p>
     </footer>
 
 </body>

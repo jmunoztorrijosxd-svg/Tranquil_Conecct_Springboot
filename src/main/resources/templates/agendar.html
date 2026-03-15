@@ -13,7 +13,7 @@
             position: fixed;
             inset: 0;
             background: #A0C4FF;
-            opacity: 0; /* Invisible por defecto */
+            opacity: 0;
             pointer-events: none;
             transition: opacity 0.35s ease;
             z-index: 9999;
@@ -157,6 +157,7 @@
         }
 
         .fade-section.show {
+            display: flex;
             opacity: 1;
         }
 
@@ -165,10 +166,6 @@
             flex-wrap: wrap;
             gap: 20px;
             margin-top: 30px;
-        }
-
-        #cards-section.fade-section.show {
-            display: flex;
         }
 
         #calendario-section.fade-section.show {
@@ -189,6 +186,7 @@
             width: 85px;
             border-radius: 50%;
             margin-bottom: 12px;
+            object-fit: cover;
         }
 
         .agenda-btn {
@@ -225,6 +223,7 @@
             border-radius: 8px;
             margin-top: 10px;
             font-size: 16px;
+            box-sizing: border-box;
         }
 
         .confirm-btn {
@@ -237,11 +236,54 @@
             cursor: pointer;
             width: 100%;
             margin-top: 12px;
+            font-weight: bold;
         }
 
         .confirm-btn:hover {
             opacity: 0.85;
         }
+
+        /* NUEVOS ESTILOS PARA LA TABLA DE CITAS */
+        .tabla-citas-container {
+            margin-top: 50px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .citas-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .citas-table th {
+            background-color: #A0C4FF;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .citas-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #444;
+        }
+
+        .status-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-pendiente { background: #fff3cd; color: #856404; }
+        .status-aprobada { background: #d4edda; color: #155724; }
+        .status-cancelada { background: #f8d7da; color: #721c24; }
 
         .footer {
             background: #A0C4FF;
@@ -250,6 +292,15 @@
             padding: 15px;
             font-weight: bold;
             font-size: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: inline-block;
         }
     </style>
 
@@ -262,7 +313,8 @@
             document.getElementById("sideMenu").style.width = "0";
         }
 
-        function mostrarCalendario() {
+        function mostrarCalendario(psicologoId) {
+            document.getElementById("psicologoIdInput").value = psicologoId;
             document.getElementById("cards-section").classList.remove("show");
             setTimeout(() => {
                 document.getElementById("calendario-section").classList.add("show");
@@ -278,7 +330,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const overlay = document.querySelector(".page-transition");
-
             if (overlay) {
                 setTimeout(() => {
                     overlay.classList.remove("is-loading");
@@ -287,21 +338,12 @@
 
             document.querySelectorAll("a[href]").forEach(link => {
                 const href = link.getAttribute("href");
-
-                if (
-                    href &&
-                    !href.startsWith("#") &&
-                    !href.startsWith("javascript") &&
-                    !link.hasAttribute("target") &&
-                    !link.hasAttribute("onclick") 
-                ) {
+                if (href && !href.startsWith("#") && !href.startsWith("javascript") && !link.hasAttribute("target") && !link.hasAttribute("onclick")) {
                     link.addEventListener("click", e => {
                         e.preventDefault();
                         if (overlay) {
                             overlay.classList.add("active");
-                            setTimeout(() => {
-                                window.location.href = link.href;
-                            }, 350); 
+                            setTimeout(() => { window.location.href = link.href; }, 350); 
                         } else {
                             window.location.href = link.href;
                         }
@@ -321,9 +363,7 @@
 
         <div class="logo-container">
             <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img" alt="logo"/>
-            <span class="logo-text">
-                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
-            </span>
+            <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
         </div>
 
         <div class="spacer"></div>
@@ -333,6 +373,12 @@
                 <div th:if="${usuario.rol == 'ADMIN'}">
                     <a th:href="@{/dashboard}" class="dashboard-btn">
                         <i class="fas fa-users-cog"></i> Dashboard
+                    </a>
+                </div>
+                
+                <div th:if="${usuario.rol == 'PSICOLOGO'}">
+                    <a th:href="@{/dashboard-psicologo}" class="dashboard-btn">
+                        <i class="fas fa-user-md"></i> Mi Panel
                     </a>
                 </div>
 
@@ -360,23 +406,67 @@
     </div>
 
     <div class="content">
+        <div th:if="${param.exito}" class="alert-success">
+            <i class="fas fa-check-circle"></i> ¡Tu cita ha sido agendada con éxito!
+        </div>
+
         <h2>Encuentra a tu especialista</h2>
 
         <div id="cards-section" class="cards-container fade-section show">
-            <div class="card" th:each="psicologo : ${psicologos}">
-                <img src="https://i.pravatar.cc/100?img=12" alt="Avatar Psicólogo">
-                <h3 th:text="${psicologo.nombre}">Nombre del Psicólogo</h3>
-                <p th:text="${psicologo.especialidad}">Especialidad</p>
-                <button class="agenda-btn" onclick="mostrarCalendario()">Agendar Sesión</button>
+            <div class="card" th:each="p : ${psicologos}">
+                <img src="https://i.pravatar.cc/150" alt="Avatar Psicólogo">
+                <h3 th:text="${p.nombre}">Nombre del Psicólogo</h3>
+                <p th:text="${p.especialidad}">Especialidad</p>
+                <button class="agenda-btn" th:onclick="'mostrarCalendario(' + ${p.id} + ')'">Agendar Sesión</button>
+            </div>
+
+            <div th:if="${#lists.isEmpty(psicologos)}" style="width:100%; margin-top: 20px;">
+                <p style="color: #666;">No hay especialistas disponibles en este momento.</p>
             </div>
         </div>
 
         <div id="calendario-section" class="fade-section">
             <div class="calendar-card">
                 <h2>📆 Selecciona la fecha</h2>
-                <input type="date">
-                <button class="confirm-btn">Confirmar fecha</button>
-                <button class="confirm-btn" onclick="mostrarCards()">⬅ Volver a Especialistas</button>
+                <form th:action="@{/confirmar-cita}" method="post">
+                    <input type="hidden" name="psicologoId" id="psicologoIdInput">
+                    <input type="date" name="fecha" required th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                    <button type="submit" class="confirm-btn">Confirmar fecha</button>
+                    <button type="button" class="confirm-btn" onclick="mostrarCards()" style="background: #ccc; color: #333;">⬅ Volver</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="tabla-citas-container">
+            <h2 style="color: #2c3e50;"><i class="fas fa-history"></i> Mis Citas Agendadas</h2>
+            
+            <div th:if="${not #lists.isEmpty(misCitas)}">
+                <table class="citas-table">
+                    <thead>
+                        <tr>
+                            <th>Psicólogo</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cita : ${misCitas}">
+                            <td th:text="${cita.psicologo.nombre}" style="font-weight: bold;">Nombre</td>
+                            <td th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                            <td>
+                                <span class="status-pill" 
+                                      th:classappend="${cita.estado == 'PENDIENTE' ? 'status-pendiente' : (cita.estado == 'APROBADA' ? 'status-aprobada' : 'status-cancelada')}"
+                                      th:text="${cita.estado}">
+                                    ESTADO
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${#lists.isEmpty(misCitas)}" style="padding: 20px;">
+                <p style="color: #999;">Aún no tienes citas registradas.</p>
             </div>
         </div>
     </div>
@@ -387,4 +477,3 @@
 
 </body>
 </html>
-

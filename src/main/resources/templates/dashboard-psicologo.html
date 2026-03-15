@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Profesional - Tranquil Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4975d4;
+            --secondary-color: #A0C4FF;
+            --bg-color: #f0f4f8;
+            --text-dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo { font-size: 22px; font-weight: bold; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+
+        .btn-logout {
+            background: #c44949;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .welcome-header {
+            margin-bottom: 30px;
+        }
+
+        .welcome-header h1 { color: var(--primary-color); margin: 0; }
+        .welcome-header p { color: #64748b; font-size: 18px; }
+
+        /* Grid de Módulos */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card i { font-size: 30px; color: var(--primary-color); margin-bottom: 15px; }
+        .card h3 { margin: 10px 0; color: var(--text-dark); }
+        .card p { color: #64748b; line-height: 1.5; }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .badge-pro {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        .footer {
+            background: var(--secondary-color);
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕 <span style="font-size: 14px; font-weight: normal;">| Panel Profesional</span></div>
+        <div class="user-info">
+            <span th:text="${usuario.nombre}">Psicólogo</span>
+            <a th:href="@{/logout}" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-header">
+            <h1>Bienvenido/a, Dr/a. <span th:text="${usuario.nombre}">Colega</span> <span class="badge-pro">Perfil Verificado</span></h1>
+            <p>Gestiona tus pacientes y sesiones programadas para hoy.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Mis Citas</h3>
+                <p>Visualiza y organiza tu agenda semanal. Tienes 0 citas pendientes para hoy.</p>
+                <a href="#" class="btn-action">Gestionar Agenda →</a>
+            </div>
+
+            <div class="card">
+                <i class="fas fa-user-md"></i>
+                <h3>Mis Pacientes</h3>
+                <p>Accede a las historias clínicas y realiza seguimiento a tus consultas.</p>
+                <a href="#" class="btn-action">Ver Listado →</a>
+            </div>
+
+            <div class="card">
+                <i class="fas fa-users-cog"></i>
+                <h3>Grupos de Apoyo</h3>
+                <p>Modera tus grupos asignados y revisa la actividad de los foros.</p>
+                <a href="#" class="btn-action">Ir a Mis Grupos →</a>
+            </div>
+
+            <div class="card">
+                <i class="fas fa-id-card"></i>
+                <h3>Perfil Público</h3>
+                <p><strong>Especialidad:</strong> <span th:text="${usuario.especialidad}">General</span></p>
+                <p><strong>Tarjeta:</strong> <span th:text="${usuario.tarjetaProfesional}">N/A</span></p>
+                <a href="#" class="btn-action">Editar Perfil →</a>
+            </div>
+            <div class="card">
+    <div class="card">
+    <i class="fas fa-calendar-alt"></i>
+    <h3>Mis Citas</h3>
+    <p>Visualiza y organiza tu agenda semanal. Tienes citas pendientes para revisar.</p>
+    <a th:href="@{/mis-citas-profesional}" class="btn-action">Gestionar Agenda →</a>
+</div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2026 Tranquil Connect • Área Profesional Protegida</p>
+    </footer>
+
+</body>
+</html>

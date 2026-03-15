@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tranquil Connect - Validación de Profesionales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f4f7f6; 
+            margin: 0; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Navbar / Header */
+        .header { 
+            background: #A0C4FF; 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 { margin: 0; font-size: 24px; }
+
+        .btn-back {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s;
+        }
+
+        .btn-back:hover { opacity: 0.8; }
+
+        .container { 
+            padding: 40px 20px; 
+            max-width: 1100px; 
+            margin: 0 auto;
+            flex: 1; /* Empuja el footer hacia abajo */
+        }
+
+        /* Mensajes de feedback */
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 { color: #4975d4; margin-bottom: 20px; }
+
+        /* Tabla estilizada */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        th, td { padding: 18px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #4975d4; color: white; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+        
+        tr:hover { background-color: #f9fbff; }
+
+        .btn-aprobar { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-aprobar:hover { background: #218838; }
+
+        /* Footer */
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a th:href="@{/dashboard}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+        <h1>𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</h1>
+        <div style="width: 140px;"></div> </div>
+
+    <div class="container">
+        <div th:if="${param.exitoAprobacion}" class="alert-success">
+            <i class="fas fa-check-circle"></i> 
+            <span>¡Profesional aprobado con éxito! El psicólogo ya puede acceder a su panel.</span>
+        </div>
+
+        <h2><i class="fas fa-user-clock"></i> Solicitudes Pendientes</h2>
+        
+        <table th:if="${not #lists.isEmpty(solicitudes)}">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Especialidad</th>
+                    <th>Tarjeta Profesional</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${solicitudes}">
+                    <td th:text="${p.nombre}" style="font-weight: 600; color: #333;"></td>
+                    <td th:text="${p.correo}"></td>
+                    <td>
+                        <span style="background: #eef2ff; color: #4975d4; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;" 
+                              th:text="${p.especialidad}"></span>
+                    </td>
+                    <td th:text="${p.tarjetaProfesional}" style="font-family: monospace; font-size: 14px;"></td>
+                    <td>
+                        <form th:action="@{/admin/aprobar/{id}(id=${p.id})}" method="post" 
+                              onsubmit="return confirm('¿Estás seguro de que deseas aprobar a este profesional?');">
+                            <button type="submit" class="btn-aprobar">
+                                <i class="fas fa-check"></i> Aprobar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(solicitudes)}" style="text-align: center; padding: 50px; background: white; border-radius: 12px;">
+            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+            <p style="color: #666; font-size: 18px;">No hay solicitudes profesionales pendientes por ahora.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2026 Tranquil Connect • Panel de Administración</p>
+    </footer>
+
+</body>
+</html>

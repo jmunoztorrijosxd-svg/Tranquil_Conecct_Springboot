@@ -470,26 +470,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="g : ${grupos}">
-                        <td th:text="${g.id_grupo}">101</td>
-                        <td th:text="${g.nombre}">Grupo de Programadores</td>
-                        <td th:text="${g.descripcion}">Desarrollo de Apps</td>
-                        <td th:text="${g.num_miembros}">15</td>
-                        <td th:text="${g.motivo_salida}">Ninguno</td>
-                        <td>
-                            <a th:href="@{/dashboard/grupos/editar/{id}(id=${g.id_grupo})}" class="action-btn">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a th:href="@{/dashboard/grupos/eliminar/{id}(id=${g.id_grupo})}" class="action-btn delete-btn"
-                                onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?');">
-                                <i class="fas fa-trash-alt"></i> Eliminar
-                            </a>
-                        </td>
-                    </tr>
+    <tbody>
+    <tr th:each="g : ${listaDeGrupos}">
+        <td th:text="${g.idGrupo}"></td>
+        <td th:text="${g.nombre}"></td>
+        <td th:text="${g.descripcion}"></td>
+        <td th:text="${g.numMiembros}"></td>
+        <td th:text="${g.motivoSalida}"></td>
+        <td>
+            <a th:href="@{/dashboard/grupos/editar/{id}(id=${g.idGrupo})}" class="action-btn">Editar</a>
+            <a th:href="@{/dashboard/grupos/eliminar/{id}(id=${g.idGrupo})}" class="action-btn delete-btn">Eliminar</a>
+        </td>
+    </tr>
 
-                    <tr th:if="${#lists.isEmpty(grupos)}">
-                        <td colspan="6" style="text-align: center;">No se encontraron grupos que coincidan con los filtros.</td>
-                    </tr>
+    <tr th:if="${#lists.isEmpty(listaDeGrupos)}">
+        <td colspan="6" style="text-align: center;">No se encontraron grupos que coincidan con los filtros.</td>
+    </tr>
+</tbody>
 
                     <tr th:unless="${grupos}">
                         <td>20</td>

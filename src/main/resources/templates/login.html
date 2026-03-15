@@ -25,7 +25,7 @@
         .fade-overlay {
             position: fixed;
             inset: 0;
-            background: #A0C4FF; /* mismo color header/footer */
+            background: #A0C4FF;
             opacity: 0;
             pointer-events: none;
             z-index: 9999;
@@ -197,12 +197,14 @@
             const form = document.querySelector("form");
             if (form) {
                 form.addEventListener("submit", e => {
-                    e.preventDefault();
-                    overlay.classList.add("active");
-
-                    setTimeout(() => {
-                        form.submit();
-                    }, 400);
+                    // Solo activar overlay si el formulario es válido
+                    if (form.checkValidity()) {
+                        overlay.classList.add("active");
+                        // No prevenimos el default aquí para dejar que Spring Security haga su trabajo
+                        // O si prefieres el retraso:
+                        // e.preventDefault();
+                        // setTimeout(() => { form.submit(); }, 400);
+                    }
                 });
             }
         });
@@ -211,7 +213,6 @@
 
 <body>
 
-    <!-- CAPA DE DESVANECIDO -->
     <div class="fade-overlay" id="fadeOverlay"></div>
 
     <div class="navbar">
@@ -232,10 +233,14 @@
                 ✅ ¡Registro exitoso! Ya puedes iniciar sesión.
             </div>
 
+            <div th:if="${param.claveActualizada}" class="success-message" style="background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;">
+                🔑 ¡Contraseña actualizada! Ya puedes ingresar.
+            </div>
+
             <form th:action="@{/login}" method="post">
                 <div class="input-group">
                     <label for="correo">Correo Electrónico</label>
-                    <input type="email" id="correo" name="username"required>
+                    <input type="email" id="correo" name="username" required>
                 </div>
 
                 <div class="input-group">
@@ -251,7 +256,7 @@
             </form>
 
             <div class="links-auth">
-                <a th:href="@{/forgot_password}">¿Olvidaste tu contraseña?</a> |
+                <a th:href="@{/recuperar-clave}">¿Olvidaste tu contraseña?</a> |
                 <a th:href="@{/registro}">Registrarse</a>
             </div>
         </div>

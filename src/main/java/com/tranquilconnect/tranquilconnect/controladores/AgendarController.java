@@ -1,57 +1,106 @@
 package com.tranquilconnect.tranquilconnect.controladores;
 
-// Importaciones de Spring Security
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // ¡NUEVA IMPORTACIÓN!
-import org.springframework.security.core.userdetails.UserDetails; // ¡NUEVA IMPORTACIÓN!
-
+import com.tranquilconnect.tranquilconnect.model.Cita;
 import com.tranquilconnect.tranquilconnect.model.Usuario; 
-import com.tranquilconnect.tranquilconnect.repository.UsuarioRepository; // ¡NUEVA IMPORTACIÓN!
-import com.tranquilconnect.tranquilconnect.model.Psicologo; 
-import com.tranquilconnect.tranquilconnect.repository.PsicologoRepository; 
-
+import com.tranquilconnect.tranquilconnect.repository.UsuarioRepository; 
+import com.tranquilconnect.tranquilconnect.repository.CitaRepository; 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model; 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.List; 
-// Ya no necesitamos la importación de HttpSession ni List
 
 @Controller
 public class AgendarController {
 
-    @Autowired
-    private PsicologoRepository psicologoRepository;
-
-    // Se necesita el repositorio del usuario para obtener el objeto completo
     @Autowired 
     private UsuarioRepository usuarioRepository; 
 
+    @Autowired
+    private CitaRepository citaRepository;
+
     @GetMapping("/agendar")
-    // MÉTODO MODIFICADO: Inyectamos el usuario de Spring Security
     public String mostrarpagina(Model model, @AuthenticationPrincipal UserDetails userDetails) { 
-        
-        Usuario usuario = null;
-        
+        Usuario usuarioLogueado = null;
         if (userDetails != null) {
-            // 1. OBTENER CORREO (Username) DE LA SESIÓN DE SPRING SECURITY
             String correo = userDetails.getUsername(); 
+            usuarioLogueado = usuarioRepository.findByCorreo(correo).orElse(null);
             
-            // 2. BUSCAR EL OBJETO Usuario COMPLETO DE LA BD
-            usuario = usuarioRepository.findByCorreo(correo).orElse(null);
+            if (usuarioLogueado != null) {
+                List<Cita> misCitas = citaRepository.findByPaciente(usuarioLogueado);
+                model.addAttribute("misCitas", misCitas);
+            }
         }
+        model.addAttribute("usuario", usuarioLogueado);
         
-        // 3. PASAR USUARIO AL MODELO (Puede ser null si el usuario no está logueado, 
-        // pero la ruta debería estar protegida por Spring Security)
-        model.addAttribute("usuario", usuario);
-        
-        // 4. Obtener la lista de psicólogos de la BD
-        List<Psicologo> listaPsicologos = psicologoRepository.findAll();
-        
-        // 5. Añadir la lista de psicólogos al objeto Model
+        List<Usuario> listaPsicologos = usuarioRepository.findByRolAndEstadoValidacion("PSICOLOGO", "APROBADO");
         model.addAttribute("psicologos", listaPsicologos);
         
-        // 6. Devuelve el nombre de la plantilla
         return "agendar";
+    }
+
+    @PostMapping("/confirmar-cita")
+    public String guardarCita(@RequestParam("psicologoId") Long psicologoId, // Cambiado a Long
+                             @RequestParam("fecha") String fechaStr, 
+                             Authentication auth) {
+        
+        if (auth == null) return "redirect:/login";
+
+        String correo = auth.getName();
+        Usuario paciente = usuarioRepository.findByCorreo(correo)
+                            .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+        
+        // Ahora coincidirá con el Repositorio que espera Long
+        Usuario psicologo = usuarioRepository.findById(psicologoId)
+                            .orElseThrow(() -> new RuntimeException("Psicólogo no encontrado"));
+
+        Cita nuevaCita = new Cita();
+        nuevaCita.setPaciente(paciente);
+        nuevaCita.setPsicologo(psicologo);
+        
+        try {
+            nuevaCita.setFecha(LocalDate.parse(fechaStr)); 
+        } catch (Exception e) {
+            return "redirect:/agendar?error_fecha";
+        }
+        
+        nuevaCita.setEstado("PENDIENTE");
+        citaRepository.save(nuevaCita);
+
+        return "redirect:/agendar?exito";
+    }
+
+    @GetMapping("/mis-citas-profesional")
+    public String verCitasProfesional(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+
+        String correo = userDetails.getUsername();
+        Usuario psicologo = usuarioRepository.findByCorreo(correo)
+                            .orElseThrow(() -> new RuntimeException("Profesional no encontrado"));
+
+        List<Cita> citasRecibidas = citaRepository.findByPsicologo(psicologo);
+        
+        model.addAttribute("usuario", psicologo);
+        model.addAttribute("citas", citasRecibidas);
+        
+        return "citas-psicologo"; 
+    }
+
+    @PostMapping("/aprobar-cita")
+    public String aprobarCita(@RequestParam("citaId") Long citaId) { // Cambiado a Long
+        Cita cita = citaRepository.findById(citaId)
+                    .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+        
+        cita.setEstado("APROBADA");
+        citaRepository.save(cita);
+        
+        return "redirect:/mis-citas-profesional?aprobada";
     }
 }

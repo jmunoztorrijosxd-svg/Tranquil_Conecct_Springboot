@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Administración - Tranquil Connect</title>
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         /* --- ESTILOS COMPARTIDOS (Navbar, Side Menu, Footer) --- */
@@ -36,11 +33,11 @@
         }
 
         .fade-overlay.loaded {
-            opacity: 0; /* Desaparece al cargar */
+            opacity: 0; 
         }
         
         .fade-overlay.active {
-            opacity: 1; /* Aparece al navegar */
+            opacity: 1; 
         }
 
         .navbar {
@@ -72,9 +69,8 @@
             transition: background-color 0.2s;
         }
         
-        /* 🚨 NUEVO ESTILO para el botón de inicio */
         .auth-links a.home-btn {
-            background-color: #4975d4; /* Color azul, destacando */
+            background-color: #4975d4; 
             margin-right: 15px;
             display: flex;
             align-items: center;
@@ -86,14 +82,13 @@
         }
 
         .auth-links a.logout-btn {
-            background-color: #c44949; /* Rojo para cerrar sesión */
+            background-color: #c44949; 
         }
 
         .auth-links a.logout-btn:hover {
             background-color: #9c3a3a;
         }
 
-        /* Estilos del Side Menu */
         .menu-btn {
             font-size: 28px;
             cursor: pointer;
@@ -162,6 +157,9 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             text-align: left;
             transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         
         .dashboard-card:hover {
@@ -177,6 +175,11 @@
             gap: 10px;
         }
 
+        /* 🚨 Estilo especial para la tarjeta de solicitudes pendientes */
+        .card-urgent {
+            border-left: 5px solid #ff9800;
+        }
+
         .dashboard-card .card-action {
              background-color: #A0C4FF;
              color: white;
@@ -187,12 +190,12 @@
              margin-top: 15px;
              font-weight: 600;
              transition: background-color 0.2s;
+             text-align: center;
         }
 
         .dashboard-card .card-action:hover {
              background-color: #4975d4;
         }
-
 
         .footer {
             background-color: #A0C4FF;
@@ -218,11 +221,8 @@
             document.getElementById("sideMenu").style.width = "0";
         }
 
-        /* 🔵 TRANSICIÓN AZUL */
         document.addEventListener("DOMContentLoaded", () => {
             const overlay = document.getElementById("fadeOverlay");
-            
-            // 1. Ocultar la capa azul (fade-in) cuando la página carga
             if (overlay) {
                 setTimeout(() => {
                     overlay.classList.add("loaded"); 
@@ -232,13 +232,12 @@
                 }, 50); 
             }
 
-            // 2. Controlar la transición (fade-out) al hacer clic en un enlace
             const links = document.querySelectorAll("a[href]");
-
             links.forEach(link => {
                 if (
                     link.getAttribute("href").startsWith("javascript") ||
-                    link.getAttribute("target") === "_blank"
+                    link.getAttribute("target") === "_blank" ||
+                    link.getAttribute("href").startsWith("#")
                 ) return;
 
                 link.addEventListener("click", e => {
@@ -267,24 +266,19 @@
 
         <div class="logo-container">
             <img th:src="@{/tranquil_connect_new_logo.png}" style="height: 40px; width: 40px; margin-right:10px; border-radius: 50%;" alt="Logo">
-            <span style="font-size: 24px; font-weight: bold;">
-                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
-            </span>
+            <span style="font-size: 24px; font-weight: bold;">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
         </div>
 
         <div class="spacer"></div>
 
         <div class="auth-links">
             <div th:if="${usuario}" style="display:flex; align-items:center;">
-                
                 <a th:href="@{/index}" class="home-btn">
                     <i class="fas fa-home"></i> Volver al Inicio
                 </a>
-                
                 <span style="color: white; font-weight: 600; margin-right: 10px;">
                     Administrador, <span th:text="${usuario.nombre}">Usuario</span>!
                 </span>
-
                 <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
             </div>
         </div>
@@ -293,34 +287,40 @@
     <div id="sideMenu" class="side-menu">
         <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
         <a th:href="@{/dashboard}">🏠 Dashboard Principal</a>
+        <a th:href="@{/dashboard/solicitudes}">⚖️ Validar Psicólogos</a>
         <a th:href="@{/usuarios}">👥 Gestión de Usuarios</a>
-        <a th:href="@{/dashboard/citas}">Gestion de grupos</a>
-        <a th:href="@{/gruposcrud}">💬 Moderación de Foros</a>
+        <a th:href="@{/gruposcrud}">💬 Gestión de Grupos</a>
         <hr style="border-color: rgba(255,255,255,0.2); margin: 15px 0;">
         <a th:href="@{/index}">⬅️ Volver al Inicio (Público)</a>
     </div>
 
     <div class="dashboard-container">
         <h1>Panel de Administración</h1>
-        <p>Bienvenido al área de gestión. Utiliza los módulos de abajo o el menú lateral para navegar.</p>
+        <p>Bienvenido al área de gestión. Revisa las solicitudes pendientes de profesionales de salud.</p>
 
         <div class="dashboard-grid">
             
+            <div class="dashboard-card card-urgent">
+                <h3><i class="fas fa-user-check"></i> Validar Psicólogos</h3>
+                <p>Revisa y aprueba las solicitudes de nuevos profesionales que desean unirse a la plataforma.</p>
+                <a th:href="@{/dashboard/solicitudes}" class="card-action" style="background-color: #ff9800;">Ver Solicitudes</a>
+            </div>
+
             <div class="dashboard-card">
                 <h3><i class="fas fa-user-friends"></i> Gestión de Usuarios</h3>
-                <p>Ver, editar y eliminar cuentas de usuario. Asignar roles (Admin/Usuario).</p>
+                <p>Ver, editar y eliminar cuentas de usuario. Gestionar permisos generales.</p>
                 <a th:href="@{/usuarios}" class="card-action">Ir a Usuarios</a>
             </div>
 
             <div class="dashboard-card">
                 <h3><i class="fas fa-calendar-check"></i> Gestión de Grupos</h3>
-                <p>Monitorea y gestiona todas los grupos que han sido creados.</p>
+                <p>Monitorea y gestiona todos los grupos de apoyo creados en la red.</p>
                 <a th:href="@{/gruposcrud}" class="card-action">Revisar Grupos</a>
             </div>
 
             <div class="dashboard-card">
                 <h3><i class="fas fa-comments"></i> Moderación de Foros</h3>
-                <p>Modera publicaciones, comentarios y asegura el cumplimiento de normas.</p>
+                <p>Asegura el cumplimiento de normas en publicaciones y comentarios.</p>
                 <a th:href="@{/dashboard/foros}" class="card-action">Moderar Contenido</a>
             </div>
 
@@ -328,7 +328,7 @@
     </div>
 
     <footer class="footer">
-        <p>2025 Tranquil Connect • Panel de Administración</p>
+        <p>2026 Tranquil Connect • Panel de Administración</p>
     </footer>
 </body>
 </html>
