@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Eliminamos márgenes del body para que no haya huecos blancos en el iframe */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0;
+            background-color: transparent; /* Permite ver el fondo de la página padre si es necesario */
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Área de mensajes: quitamos el padding excesivo para aprovechar espacio */
+        .message-area {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #E6F0FF; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Burbujas de chat */
+        .message {
+            max-width: 80%;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            position: relative;
+            line-height: 1.4;
+        }
+        
+        .sent { 
+            align-self: flex-end; 
+            background-color: #6DA4FF; 
+            color: white; 
+            border-bottom-right-radius: 2px;
+        }
+        
+        .received { 
+            align-self: flex-start; 
+            background-color: white; 
+            color: #333; 
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .chat-img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .message-info {
+            font-size: 10px;
+            text-align: right;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        /* Barra de entrada de texto: la ajustamos al borde inferior del iframe */
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background-color: white;
+            border-top: 1px solid #d1d9e6;
+            align-items: center;
+        }
+
+        .input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin-right: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .btn-send {
+            background-color: #A0C4FF; 
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .btn-send:hover { background-color: #8db5f0; }
+
+        #file-label { color: #888; font-size: 18px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="message-area" id="message-area">
+        {% for mensaje in mensajes %}
+            <div class="message {% if mensaje.id_usuario == 1 %}sent{% else %}received{% endif %}">
+                {% if mensaje.contenido %}
+                    <div>{{ mensaje.contenido }}</div>
+                {% endif %}
+                
+                {% if mensaje.imagen_url %}
+                    <img src="{{ mensaje.imagen_url.url }}" class="chat-img">
+                {% endif %}
+
+                <div class="message-info">
+                    {{ mensaje.fecha_envio|date:"H:i" }} 
+                    {% if mensaje.id_usuario == 1 %}<i class="fa-solid fa-check-double"></i>{% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p style="text-align: center; color: #888; font-size: 13px; margin-top: 20px;">
+                No hay mensajes aún. ¡Sé el primero en escribir!
+            </p>
+        {% endfor %}
+    </div>
+
+    <form id="form-chat" class="input-area" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <label for="file-input" id="file-label" title="Enviar imagen">
+            <i class="fa-solid fa-camera"></i>
+        </label>
+        <input type="file" name="imagen" id="file-input" style="display: none;" onchange="document.getElementById('form-chat').submit();">
+
+        <input type="text" name="contenido" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+        
+        <button type="submit" class="btn-send">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </form>
+
+    <script>
+        // Scroll automático al final al cargar
+        const messageArea = document.getElementById('message-area');
+        messageArea.scrollTop = messageArea.scrollHeight;
+    </script>
+</body>
+</html>
