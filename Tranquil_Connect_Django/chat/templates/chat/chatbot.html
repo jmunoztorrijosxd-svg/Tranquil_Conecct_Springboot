@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tranquil Connect - IA Asistente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #A0C4FF;
+            --secondary-color: #4975d4;
+            --bg-body: #f4f7f9;
+            --user-msg: #A0C4FF;
+            --bot-msg: #ffffff;
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        /* Contenedor Principal */
+        .chat-screen {
+            max-width: 900px;
+            margin: auto;
+            width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* Encabezado */
+        .chat-header {
+            background: var(--primary-color);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-info { display: flex; align-items: center; gap: 15px; }
+        .bot-avatar {
+            width: 45px;
+            height: 45px;
+            background: white;
+            color: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Área de Mensajes */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Estilo de Burbujas */
+        .bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease-in-out;
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mensaje-user {
+            background-color: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-radius: 18px 18px 2px 18px;
+            box-shadow: 0 4px 10px rgba(160, 196, 255, 0.3);
+        }
+
+        .mensaje-bot {
+            background-color: var(--bot-msg);
+            color: #333;
+            align-self: flex-start;
+            border-radius: 18px 18px 18px 2px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        /* Indicador de Carga */
+        .typing-indicator {
+            align-self: flex-start;
+            background: #eee;
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: none;
+            font-size: 13px;
+            color: #777;
+        }
+
+        /* Área de Entrada */
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .input-wrapper {
+            display: flex;
+            background: #f0f2f5;
+            border-radius: 30px;
+            padding: 5px 15px;
+            align-items: center;
+        }
+
+        #user-input {
+            border: none;
+            background: transparent;
+            padding: 10px;
+            flex: 1;
+            outline: none;
+        }
+
+        .btn-send {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-send:hover { background: #395aa8; transform: scale(1.1); }
+
+        /* Scrollbar Personalizado */
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="chat-screen mt-4 mb-4">
+    <div class="chat-header">
+        <div class="header-info">
+            <a href="http://localhost:8090/grupos" style="color: white; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="bot-avatar shadow-sm">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <h5 class="m-0">Tranquil Connect AI</h5>
+                <small><i class="fas fa-circle text-success" style="font-size: 8px;"></i> En línea ahora</small>
+            </div>
+        </div>
+        <div class="badge bg-light text-dark p-2">Sesión ID: {{ usuario_id }}</div>
+    </div>
+
+    <div id="chat-container">
+        {% for chat in historial %}
+            <div class="bubble mensaje-user">{{ chat.mensaje_usuario }}</div>
+            <div class="bubble mensaje-bot">{{ chat.respuesta_bot }}</div>
+        {% empty %}
+            <div class="text-center text-muted small mt-4">No hay mensajes previos. ¡Hola! ¿En qué puedo ayudarte hoy?</div>
+        {% endfor %}
+        
+        <div id="indicador-carga" class="typing-indicator">
+            <i class="fas fa-ellipsis-h"></i> La IA está escribiendo...
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <div class="input-wrapper">
+            <input type="hidden" id="usuario-id-hidden" value="{{ usuario_id }}">
+            
+            <input type="text" id="user-input" placeholder="Escribe lo que sientes..." autocomplete="off">
+            <button class="btn-send" id="btn-enviar">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <p class="text-center mt-2 mb-0" style="font-size: 11px; color: #aaa;">
+            Tus conversaciones son privadas y seguras bajo el ID {{ usuario_id }}.
+        </p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function scrollAlFinal() {
+        const container = $("#chat-container");
+        container.animate({ scrollTop: container[0].scrollHeight }, 300);
+    }
+
+    // Ejecutar scroll al cargar
+    $(document).ready(function() {
+        scrollAlFinal();
+    });
+
+    function enviarMensaje() {
+        let mensaje = $('#user-input').val().trim();
+        let u_id = $('#usuario-id-hidden').val();
+
+        if (mensaje === "") return;
+
+        // Mostrar el mensaje del usuario en la UI inmediatamente
+        $('#chat-container').append(`<div class="bubble mensaje-user">${mensaje}</div>`);
+        $('#user-input').val('');
+        $('#indicador-carga').show();
+        
+        scrollAlFinal();
+
+        $.ajax({
+            url: "{% url 'chatbot_gemini' %}",
+            type: "POST",
+            data: {
+                'mensaje': mensaje,
+                'usuario_id': u_id, // Enviamos el ID real extraído del JWT
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                $('#indicador-carga').hide();
+                if (response.respuesta) {
+                    $('#chat-container').append(`<div class="bubble mensaje-bot">${response.respuesta}</div>`);
+                } else if (response.error) {
+                    $('#chat-container').append(`<div class="bubble mensaje-bot text-danger">Error: ${response.error}</div>`);
+                }
+                scrollAlFinal();
+            },
+            error: function() {
+                $('#indicador-carga').hide();
+                alert("Hubo un problema de conexión con el servidor de la IA.");
+            }
+        });
+    }
+
+    // Eventos de envío
+    $('#btn-enviar').on('click', enviarMensaje);
+    
+    $('#user-input').on('keypress', function(e) {
+        if(e.which == 13) {
+            enviarMensaje();
+        }
+    });
+</script>
+
+</body>
+</html>
