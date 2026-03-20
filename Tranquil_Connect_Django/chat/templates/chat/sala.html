@@ -11,14 +11,14 @@
             font-family: Arial, sans-serif; 
             margin: 0; 
             padding: 0;
-            background-color: transparent; /* Permite ver el fondo de la página padre si es necesario */
+            background-color: transparent; 
             display: flex; 
             flex-direction: column; 
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Área de mensajes: quitamos el padding excesivo para aprovechar espacio */
+        /* Área de mensajes */
         .message-area {
             flex-grow: 1;
             padding: 10px;
@@ -67,7 +67,7 @@
             opacity: 0.8;
         }
 
-        /* Barra de entrada de texto: la ajustamos al borde inferior del iframe */
+        /* Barra de entrada de texto */
         .input-area {
             display: flex;
             padding: 10px;
@@ -109,7 +109,7 @@
 
     <div class="message-area" id="message-area">
         {% for mensaje in mensajes %}
-            <div class="message {% if mensaje.id_usuario == 1 %}sent{% else %}received{% endif %}">
+            <div class="message {% if mensaje.id_usuario|slugify == usuario_id_actual|slugify %}sent{% else %}received{% endif %}">
                 {% if mensaje.contenido %}
                     <div>{{ mensaje.contenido }}</div>
                 {% endif %}
@@ -120,7 +120,9 @@
 
                 <div class="message-info">
                     {{ mensaje.fecha_envio|date:"H:i" }} 
-                    {% if mensaje.id_usuario == 1 %}<i class="fa-solid fa-check-double"></i>{% endif %}
+                    {% if mensaje.id_usuario|slugify == usuario_id_actual|slugify %}
+                        <i class="fa-solid fa-check-double"></i>
+                    {% endif %}
                 </div>
             </div>
         {% empty %}
@@ -133,6 +135,8 @@
     <form id="form-chat" class="input-area" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         
+        <input type="hidden" name="usuario_id" value="{{ usuario_id_actual }}">
+
         <label for="file-input" id="file-label" title="Enviar imagen">
             <i class="fa-solid fa-camera"></i>
         </label>
