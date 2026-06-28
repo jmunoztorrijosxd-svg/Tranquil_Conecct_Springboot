@@ -29,7 +29,9 @@ COPY --from=builder /app/target/*.jar /app/app.jar
 
 # Configuración Nginx y Python
 COPY ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
-RUN pip3 install --no-cache-dir -r /app/django/requirements.txt gunicorn --break-system-packages
+# Instalación de dependencias de Python (Aseguramos la ruta)
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r /app/django/requirements.txt gunicorn
 
 # Script de inicio
 COPY entrypoint.sh /entrypoint.sh
