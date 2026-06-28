@@ -20,9 +20,14 @@ import com.tranquilconnect.tranquilconnect.model.Cita;
 import java.time.LocalDate;
 import com.tranquilconnect.tranquilconnect.repository.UsuarioRepository;
 import com.tranquilconnect.tranquilconnect.repository.CitaRepository;
+import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 public class PagoController {
+
+    // Inyecta la variable desde application.properties
+    @Value("${BASE_URL}")
+    private String baseUrl;
 
     private final UsuarioRepository usuarioRepository;
     private final CitaRepository citaRepository;
