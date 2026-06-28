@@ -101,17 +101,16 @@ public class PagoController {
                     .build();
 
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-                    .items(Collections.singletonList(item))
-                    .externalReference(cita.getId().toString())
-                    .notificationUrl(
-                    "https://departure-neatness-edge.ngrok-free.dev/notificaciones-mp")
-                    .autoReturn("approved")
-                    .backUrls(PreferenceBackUrlsRequest.builder()
-                            .success("https://departure-neatness-edge.ngrok-free.dev/pago-exitoso")
-                            .failure("https://departure-neatness-edge.ngrok-free.dev/pago-fallido")
-                            .pending("https://departure-neatness-edge.ngrok-free.dev/pago-pendiente")
-                            .build())
-                    .build();
+            .items(Collections.singletonList(item))
+            .externalReference(cita.getId().toString())
+            .notificationUrl(baseUrl + "/notificaciones-mp")
+            .autoReturn("approved")
+            .backUrls(PreferenceBackUrlsRequest.builder()
+                .success(baseUrl + "/pago-exitoso")
+                .failure(baseUrl + "/pago-fallido")
+                .pending(baseUrl + "/pago-pendiente")
+                .build())
+            .build();
 
             Preference preference = new PreferenceClient().create(preferenceRequest);
             return "redirect:" + preference.getInitPoint();
