@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tranquil Connect</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <style>
+
+        html,
+        body {
+            height: 100%;
+            min-height: 100%;
+            font-family: 'Inter', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(to bottom, #f5f9ff, #eef4ff);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 🔵 CAPA AZUL */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 1;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.loaded {
+            opacity: 0;
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+        }
+
+        /* 🔹 NAVBAR */
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 12px 22px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container img {
+            height: 56px !important;
+            width: 56px !important;
+            margin-right: 12px !important;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .logo-container span {
+            font-size: 24px !important;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        /* 🔹 BOTONES SUPERIORES */
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.logout-btn:hover {
+            background-color: #395aa8;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-links a.dashboard-btn:hover {
+            background-color: #395aa8;
+        }
+
+        /* 🔹 MENÚ */
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+        }
+
+        .side-menu a {
+            padding: 15px 28px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            padding-left: 35px;
+        }
+
+        /* 🔹 CONTENIDO */
+        .content {
+            padding: 50px 20px 70px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-section {
+            margin-bottom: 45px;
+            max-width: 750px;
+            animation: fadeUp 0.8s ease;
+        }
+
+        .hero-section h1 {
+            color: #4975d4;
+            font-size: 46px;
+            margin-bottom: 15px;
+        }
+
+        .hero-section p {
+            font-size: 18px;
+            color: #5c6b80;
+            line-height: 1.7;
+        }
+
+        /* 🔹 CARDS */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 28px;
+            width: 92%;
+            max-width: 1100px;
+            justify-items: center;
+            margin-bottom: 38px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px 24px;
+            border-radius: 22px;
+            width: 100%;
+            max-width: 290px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid rgba(160,196,255,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #A0C4FF, #4975d4);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+        }
+
+        .icon {
+            height: 70px;
+            width: 70px;
+            background: linear-gradient(135deg, #A0C4FF, #6e9bff);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 28px;
+            margin: 0 auto 18px;
+            box-shadow: 0 6px 15px rgba(73,117,212,0.25);
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 22px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* 🔹 FOOTER */
+        .footer {
+            background-color: #A0C4FF;
+            text-align: center;
+            color: white;
+            padding: 18px;
+            margin-top: auto;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ✨ ANIMACIONES */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 📱 RESPONSIVE */
+        @media(max-width: 768px) {
+
+            .navbar {
+                flex-wrap: wrap;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .logo-container {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .auth-links {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+                flex-wrap: wrap;
+            }
+
+            .hero-section h1 {
+                font-size: 34px;
+            }
+
+            .hero-section p {
+                font-size: 16px;
+            }
+
+            .cards-container {
+                gap: 20px;
+            }
+        }
+
+    </style>
+
+    <script>
+
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "260px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        /* 🔵 TRANSICIÓN */
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const overlay = document.getElementById("fadeOverlay");
+
+            if (overlay) {
+
+                setTimeout(() => {
+
+                    overlay.classList.add("loaded");
+
+                    setTimeout(() => {
+                        overlay.style.display = "none";
+                    }, 400);
+
+                }, 50);
+            }
+
+            const links = document.querySelectorAll("a[href]");
+
+            links.forEach(link => {
+
+                if (
+                    link.getAttribute("href").startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) {
+                    return;
+                }
+
+                link.addEventListener("click", e => {
+
+                    e.preventDefault();
+
+                    overlay.style.display = "block";
+
+                    overlay.classList.remove("loaded");
+
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 400);
+
+                });
+
+            });
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <!-- 🔹 NAVBAR -->
+    <div class="navbar">
+
+        <button class="menu-btn" onclick="openMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="logo-container">
+
+            <img
+                th:src="@{/tranquil_connect_new_logo.png}"
+                alt="Logo"
+            >
+
+            <span>
+                𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
+            </span>
+
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="auth-links">
+
+            <div th:if="${usuario}" style="display:flex; align-items:center;">
+
+                <a
+                    th:if="${usuario.rol == 'ADMIN'}"
+                    th:href="@{/dashboard}"
+                    class="dashboard-btn"
+                >
+                    <i class="fas fa-users-cog"></i>
+                    Dashboard
+                </a>
+
+                <span style="color: white; font-weight: 600; margin-right: 10px;">
+                    Hola,
+                    <span th:text="${usuario.nombre}">Usuario</span>!
+                </span>
+
+                <a th:href="@{/logout}" class="logout-btn">
+                    Cerrar Sesión
+                </a>
+
+            </div>
+
+            <div th:unless="${usuario}">
+
+                <a th:href="@{/login}">
+                    Iniciar Sesión
+                </a>
+
+                <a th:href="@{/registro}">
+                    Registrarse
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 🔹 MENÚ -->
+    <div id="sideMenu" class="side-menu">
+
+        <a href="javascript:void(0)" onclick="closeMenu()">
+            ✖ Cerrar
+        </a>
+
+        <a th:href="@{/index}">
+            𝐈𝐧𝐢𝐜𝐢𝐨
+        </a>
+
+        <a th:href="@{/grupos}">
+            𝐆𝐫𝐮𝐩𝐨𝐬
+        </a>
+
+        <a th:href="@{/agendar}">
+            𝐀𝐠𝐞𝐧𝐝𝐚𝐫
+        </a>
+
+        <a th:href="@{/forosocial}">
+            𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥
+        </a>
+
+        <a th:href="@{/desempeno}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+
+    </div>
+
+    <!-- 🔹 CONTENIDO -->
+    <div class="content">
+
+        <section class="hero-section">
+
+            <h1>
+                Bienvenido a Tranquil Connect 💙
+            </h1>
+
+            <p>
+                Un espacio seguro para conectar,
+                sanar y crecer 🌿
+                donde puedes encontrar apoyo emocional,
+                compartir experiencias y sentirte acompañado.
+            </p>
+
+        </section>
+
+        <!-- 🔹 CARDS -->
+        <div class="cards-container">
+
+            <a th:href="@{/agendar}" class="card">
+
+                <div class="icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+
+                <h3>
+                    Agenda tu cita
+                </h3>
+
+                <p>
+                    Con profesionales dispuestos
+                    a escucharte y ayudarte.
+                </p>
+
+            </a>
+
+            <a th:href="@{/forosocial}" class="card">
+
+                <div class="icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+
+                <h3>
+                    Foro social
+                </h3>
+
+                <p>
+                    Comparte, reacciona y encuentra
+                    apoyo en la comunidad.
+                </p>
+
+            </a>
+
+            <a th:href="@{/grupos}" class="card">
+
+                <div class="icon">
+                    <i class="fas fa-people-group"></i>
+                </div>
+
+                <h3>
+                    Grupos de apoyo
+                </h3>
+
+                <p>
+                    Únete a comunidades que
+                    te entienden y acompañan.
+                </p>
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- 🔹 FOOTER -->
+    <footer class="footer">
+
+        <p>
+            2026 Tranquil Connect • Todos los derechos reservados
+        </p>
+
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Publicación - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #A0C4FF;
+            --primary-dark: #7b9ce6;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --text: #1f2937;
+            --muted: #475569;
+            --border: #d1d5db;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #eef3ff 0%, #f8fafc 100%);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-transition {
+            position: fixed;
+            inset: 0;
+            background: var(--primary);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            z-index: 9999;
+        }
+
+        .page-transition.active,
+        .page-transition.is-loading {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .navbar {
+            background: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 58px;
+            width: auto;
+            margin-right: 12px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+
+        .content {
+            flex: 1;
+            padding: 28px 24px 14px;
+            width: min(1100px, 100%);
+            margin: 0 auto;
+        }
+
+        .hero-card {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(160,196,255,0.35);
+            border-radius: 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            padding: 26px;
+            display: grid;
+            gap: 18px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 10px;
+            font-size: 32px;
+            line-height: 1.1;
+        }
+
+        .hero-card p {
+            margin: 0;
+            color: #475569;
+            font-size: 16px;
+            max-width: 740px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .step {
+            background: var(--surface-alt);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(148,163,184,0.35);
+        }
+
+        .step strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        .step span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        .edit-card {
+            background: white;
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto 32px;
+            padding: 28px;
+            border-radius: 24px;
+            box-shadow: 0 22px 40px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(160,196,255,0.35);
+            text-align: left;
+        }
+
+        .edit-card h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: var(--text);
+        }
+
+        .edit-card p {
+            color: #475569;
+            margin-bottom: 22px;
+            line-height: 1.75;
+        }
+
+        .edit-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            height: 48px;
+            width: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+        }
+
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            font-size: 15px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        textarea:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 4px rgba(160,196,255,0.24);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        button[type="submit"] {
+            background: var(--primary);
+            border: none;
+            padding: 14px 18px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-1px);
+            background: var(--primary-dark);
+        }
+
+        .cancel-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: #eef2ff;
+            color: #334155;
+            text-decoration: none;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cancel-btn:hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+        }
+
+        .preview,
+        .current-preview {
+            margin-top: 18px;
+            display: none;
+        }
+
+        .preview-label {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        .preview img,
+        .preview video,
+        .current-preview img,
+        .current-preview video {
+            width: 100%;
+            border-radius: 18px;
+            max-height: 320px;
+            object-fit: cover;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        @media (max-width: 900px) {
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .navbar {
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+
+            .menu-btn {
+                display: inline-flex;
+            }
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "260px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        function previewFile(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById("preview");
+            const currentPreview = document.getElementById("currentPreviewArea");
+
+            if (currentPreview) {
+                currentPreview.style.display = file ? "none" : "block";
+            }
+
+            preview.innerHTML = "";
+            preview.style.display = file ? "block" : "none";
+
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+
+            if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = url;
+                preview.appendChild(img);
+            } else if (file.type.startsWith("video/")) {
+                const video = document.createElement("video");
+                video.src = url;
+                video.controls = true;
+                preview.appendChild(video);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.querySelector(".page-transition");
+            const navLinks = document.querySelectorAll("a[href]");
+
+            if (overlay) {
+                overlay.classList.remove("is-loading");
+            }
+
+            navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href && !href.startsWith("#") && !href.startsWith("javascript") && !link.hasAttribute("target") && !link.hasAttribute("onclick")) {
+                    link.addEventListener("click", e => {
+                        e.preventDefault();
+                        if (overlay) {
+                            overlay.classList.add("active");
+                        }
+                        setTimeout(() => {
+                            window.location.href = link.href;
+                        }, 250);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+<div class="page-transition is-loading"></div>
+
+<div class="navbar">
+    <div class="logo-container">
+        <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img" alt="Tranquil Connect logo">
+        <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+    </div>
+</div>
+
+<div class="content">
+
+    <div class="hero-card">
+        <h2>✏️ Edita tu publicación</h2>
+        <p>Cambia tu texto y agrega un archivo si quieres.</p>
+    </div>
+
+    <div class="edit-card">
+        <h3>Editar publicación</h3>
+        <p>Haz tus cambios y guarda cuando estés listo.</p>
+
+        <form th:action="@{'/actualizar-publicacion/' + ${publicacion.id}}" method="post" enctype="multipart/form-data">
+            <div class="edit-header">
+                <div class="avatar" th:text="${publicacion.usuario.nombre.substring(0,1)}"></div>
+                <div>
+                    <h3 th:text="${publicacion.usuario.nombre}"></h3>
+                </div>
+            </div>
+
+            <textarea name="contenido" placeholder="Escribe aquí tu mensaje mejorado" th:text="${publicacion.contenido}" required></textarea>
+
+            <div th:if="${publicacion.imagen}" id="currentPreviewArea" class="current-preview" style="display: block;">
+                <div class="preview-label">Vista previa actual</div>
+                <video th:if="${publicacion.imagen.toLowerCase().endsWith('.mp4') or publicacion.imagen.toLowerCase().endsWith('.webm') or publicacion.imagen.toLowerCase().endsWith('.mov')}" controls>
+                    <source th:src="@{'/imagenes/' + ${publicacion.imagen}}">
+                </video>
+                <img th:unless="${publicacion.imagen.toLowerCase().endsWith('.mp4') or publicacion.imagen.toLowerCase().endsWith('.webm') or publicacion.imagen.toLowerCase().endsWith('.mov')}" th:src="@{'/imagenes/' + ${publicacion.imagen}}">
+            </div>
+
+            <input type="file" name="file" accept="image/*,video/*" onchange="previewFile(event)">
+
+            <div class="preview" id="preview"></div>
+
+            <div class="btn-group">
+                <a th:href="@{/forosocial}" class="cancel-btn">Cancelar</a>
+                <button type="submit">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    2026 Tranquil Connect todos los derechos reservados
+</footer>
+
+</body>
+</html>

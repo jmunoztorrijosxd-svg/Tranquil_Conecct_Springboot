@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos de apoyo - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f5f9ff, #eef4ff);
+            display: flex;
+            flex-direction: column;
+            color: #2c3e50;
+        }
+
+        /* 🔵 DESVANECIDO AZUL */
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.active {
+            opacity: 1;
+        }
+
+        /* 🔹 NAVBAR */
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 14px 28px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65px;
+            width: 65px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+            letter-spacing: 1px;
+        }
+
+        .navbar .spacer {
+            flex-grow: 1;
+        }
+
+        /* 🔹 BOTONES SUPERIORES */
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-links a.logout-btn {
+            background-color: #4975d4;
+        }
+
+        .auth-links a.dashboard-btn {
+            background-color: #4975d4;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+        }
+
+        .auth-links a.dashboard-btn:hover,
+        .auth-links a.logout-btn:hover {
+            background-color: #395aa8;
+        }
+
+        /* 🔹 MENÚ LATERAL */
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 2000;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+        }
+
+        .side-menu a {
+            padding: 15px 28px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: 'Times New Roman', serif;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 35px;
+        }
+
+        /* 🔹 CONTENIDO */
+        .content {
+            padding: 30px 20px 60px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .title-page {
+            font-size: 40px;
+            margin-top: 10px;
+            margin-bottom: 12px;
+            color: #4975d4;
+        }
+
+        .subtitle {
+            color: #667;
+            font-size: 17px;
+            margin-bottom: 35px;
+        }
+
+        /* ✅ ALERTA */
+        .alert-success {
+            width: 90%;
+            max-width: 900px;
+            margin: 0 auto 25px auto;
+            background: #d4edda;
+            color: #155724;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #c3e6cb;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 🔹 CARDS */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 28px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            width: 320px;
+            min-height: 360px;
+            padding: 24px 22px;
+            border-radius: 22px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(160,196,255,0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-ia {
+            border: 2px solid #A0C4FF;
+            background: linear-gradient(to bottom, #f0f5ff, #ffffff);
+        }
+
+        .initial-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #A0C4FF, #6f9cff);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 15px rgba(73,117,212,0.3);
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin: 6px 0 12px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 22px;
+            flex-grow: 1;
+        }
+
+        /* 🔹 BOTONES CARDS */
+        .buttons-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .join-btn {
+            background: #A0C4FF;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            width: 100%;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        .delete-btn {
+            background: #dc3545 !important;
+        }
+
+        .delete-btn:hover {
+            background: #bb2434 !important;
+        }
+
+        /* 🔹 BOTÓN FLOTANTE */
+        .btn-float-create {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(135deg, #4975d4, #6a92ec);
+            color: white !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            text-decoration: none !important;
+            z-index: 9999;
+            transition: all 0.25s ease;
+        }
+
+        .btn-float-create:hover {
+            transform: scale(1.12) rotate(90deg);
+        }
+
+        /* 🔹 FOOTER */
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: auto;
+        }
+
+        /* 📱 RESPONSIVE */
+        @media(max-width: 768px) {
+
+            .navbar {
+                flex-wrap: wrap;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .logo-container {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .auth-links {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+            }
+
+            .card {
+                width: 92%;
+            }
+
+            .title-page {
+                font-size: 32px;
+            }
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+            const links = document.querySelectorAll("a[href]");
+
+            links.forEach(link => {
+                const href = link.getAttribute("href");
+
+                if (!href ||
+                    href.includes("8000") ||
+                    href.startsWith("http") ||
+                    href.startsWith("javascript") ||
+                    link.getAttribute("target") === "_blank"
+                ) return;
+
+                link.addEventListener("click", e => {
+                    e.preventDefault();
+                    overlay.classList.add("active");
+
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 400);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+<div class="fade-overlay" id="fadeOverlay"></div>
+
+<div class="navbar">
+
+    <button class="menu-btn" onclick="openMenu()">☰</button>
+
+    <div class="logo-container">
+        <img th:src="@{/tranquil_connect_new_logo.png}"
+             class="logo-img"
+             alt="logo tranquil connect"/>
+
+        <span class="logo-text">
+            𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕
+        </span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="auth-links">
+
+        <div th:if="${usuario}"
+             style="display:flex; align-items:center;">
+
+            <div th:if="${usuario.rol == 'ADMIN'}">
+                <a th:href="@{/dashboard}" class="dashboard-btn">
+                    <i class="fas fa-users-cog"></i>
+                    Dashboard
+                </a>
+            </div>
+
+            <span style="color:white;font-weight:bold;font-size:16px;margin-right:10px;">
+                Hola,
+                <span th:text="${usuario.nombre}">Usuario</span>!
+            </span>
+
+            <a th:href="@{/logout}" class="logout-btn">
+                Cerrar Sesión
+            </a>
+
+        </div>
+
+        <div th:unless="${usuario}">
+            <a th:href="@{/login}">Iniciar Sesión</a>
+            <a th:href="@{/registro}">Registrarse</a>
+        </div>
+
+    </div>
+</div>
+
+<div id="sideMenu" class="side-menu">
+
+    <a href="javascript:void(0)" onclick="closeMenu()">
+        ✖ Cerrar
+    </a>
+
+    <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢𝐨</a>
+
+    <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+
+    <a th:href="@{'/chatbot/?auth=' + ${token_seguro}}">
+    𝐂𝐡𝐚𝐭𝐛𝐨𝐭 𝐈𝐀
+    </a>
+
+    <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+
+    <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+
+    <a th:href="@{/desempeno}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+
+</div>
+
+<div class="content">
+
+    <div th:if="${mensajeExito}" class="alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${mensajeExito}">
+            Grupo eliminado correctamente
+        </span>
+    </div>
+
+    <h1 class="title-page">
+        💬 Grupos de apoyo
+    </h1>
+
+    <p class="subtitle">
+        Encuentra personas que te entienden, comparte experiencias y recibe apoyo emocional.
+    </p>
+
+    <div class="cards-container">
+
+        <div class="card card-ia">
+
+            <div class="initial-circle"
+                 style="background:linear-gradient(135deg,#4975d4,#7da6ff);">
+
+                <i class="fas fa-robot"></i>
+
+            </div>
+
+            <h3 style="color:#4975d4;">
+                Asistente IA
+            </h3>
+
+            <p>
+                ¿Necesitas desahogarte ahora mismo?
+                Nuestro chatbot está disponible 24/7
+                para escucharte y apoyarte de forma privada.
+            </p>
+
+            <div class="buttons-group">
+
+                <a th:href="'/chatbot/?auth=' + ${token_seguro}"
+                   class="join-btn"
+                   style="background:#4975d4;">
+
+                    <i class="fas fa-comments"></i>
+                    Hablar con la IA
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="card"
+             th:each="grupo : ${listaDeGrupos}">
+
+            <div class="initial-circle"
+                 th:text="${#strings.substring(grupo.nombre,0,1)}">
+
+                I
+
+            </div>
+
+            <h3 th:text="${grupo.nombre}">
+                Nombre del Grupo
+            </h3>
+
+            <p th:text="${grupo.descripcion}">
+                Descripción del grupo de apoyo.
+            </p>
+
+            <div class="buttons-group">
+
+                <a th:href="@{/grupos/unirse/{id}(id=${grupo.idGrupo})}"
+                   class="join-btn">
+
+                    <i class="fas fa-comments"></i>
+                    Unirse / Ir al Chat
+
+                </a>
+
+                <div th:if="${usuario != null
+                             and grupo.creador != null
+                             and grupo.creador.id == usuario.id}"
+                     style="width:100%;">
+
+                    <a th:href="@{/grupos/eliminar/{id}(id=${grupo.idGrupo})}"
+                       class="join-btn delete-btn"
+                       onclick="return confirm('¿Seguro que deseas eliminar este grupo?');">
+
+                        <i class="fas fa-trash"></i>
+                        Eliminar Grupo
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<a th:href="@{/grupos/nuevo}"
+   class="btn-float-create"
+   title="Crear nuevo grupo">
+
+    <i class="fas fa-plus"></i>
+
+</a>
+
+<footer class="footer">
+
+    <p style="margin:0;">
+        2026 Tranquil Connect todos los derechos reservados
+    </p>
+
+</footer>
+
+</body>
+</html>

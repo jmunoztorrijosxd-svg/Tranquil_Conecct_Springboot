@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Grupos - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- ESTILOS COMPARTIDOS --- */
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fade-overlay {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 1; 
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .fade-overlay.loaded {
+            opacity: 0;
+        }
+
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img-nav {
+            height: 40px;
+            width: 40px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .auth-links a.home-btn { background-color: #4975d4; }
+        .auth-links a.logout-btn { background-color: #c44949; }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        /* --- ESTILOS DE TABLA --- */
+        .content-wrapper {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .groups-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .groups-table th, .groups-table td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        .groups-table th { background-color: #A0C4FF; color: white; text-transform: uppercase; font-size: 14px; }
+
+        .action-btn {
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background-color: #4975d4;
+        }
+
+        .delete-btn { background-color: #c44949; }
+        .create-btn { background-color: #38b000; padding: 10px 15px; font-size: 14px; border-radius: 6px; }
+
+        .report-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #eef4ff;
+            border-radius: 8px;
+            border: 1px solid #A0C4FF;
+        }
+
+        .search-form { display: flex; gap: 5px; flex-grow: 1; max-width: 500px; }
+        .search-form input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; flex-grow: 1; }
+        .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-search { background-color: #4975d4; }
+        .btn-clear { background-color: #95a5a6; }
+
+        .footer { background-color: #A0C4FF; text-align: center; color: white; padding: 15px; margin-top: auto; }
+        
+        .alert-success { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+    </style>
+
+    <script>
+        function openMenu() { document.getElementById("sideMenu").style.width = "250px"; }
+        function closeMenu() { document.getElementById("sideMenu").style.width = "0"; }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.getElementById("fadeOverlay");
+            if (overlay) {
+                setTimeout(() => {
+                    overlay.classList.add("loaded");
+                    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+                }, 50);
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="navbar">
+        <button class="menu-btn" onclick="openMenu()"><i class="fas fa-bars"></i></button>
+        <div class="logo-container">
+            <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img-nav" alt="Logo">
+            <span style="font-size: 24px; font-weight: bold;">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="auth-links">
+            <a th:href="@{/index}" class="home-btn"><i class="fas fa-home"></i> Volver al Inicio</a>
+            <a th:href="@{/logout}" class="logout-btn">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+        <a th:href="@{/dashboard}">🏠 Dashboard Principal</a>
+        <a th:href="@{/usuarios}">👥 Gestión de Usuarios</a>
+        <a th:href="@{/gruposcrud}">🧑‍🤝‍🧑 Gestión de Grupos</a>
+        <hr style="border-color: rgba(255,255,255,0.2); margin: 15px 0;">
+        <a th:href="@{/index}">⬅️ Volver al Inicio</a>
+    </div>
+
+    <div class="content-wrapper">
+        <h1>🧑‍🤝‍🧑 Gestión de Grupos de Apoyo</h1>
+        
+        <div th:if="${mensaje}" class="alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
+        </div>
+        <div th:if="${error}" class="alert-error">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a th:href="@{/gruposcrud/nuevo}" class="action-btn create-btn">
+                <i class="fas fa-plus-circle"></i> Crear Nuevo Grupo
+            </a>
+        </div>
+
+        <div class="report-controls">
+            <form th:action="@{/gruposcrud}" method="get" class="search-form">
+                <input type="text" name="keyword" placeholder="Buscar por Nombre o Descripción..." th:value="${keyword}">
+                <button type="submit" class="btn btn-search">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <a th:href="@{/gruposcrud}" class="btn btn-clear">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            </form>
+
+            <div style="display: flex; gap: 10px;">
+                <a th:href="@{/gruposcrud/exportar/excel(keyword=${keyword})}" class="action-btn" style="background-color: #217346;">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a th:href="@{/gruposcrud/exportar/pdf(keyword=${keyword})}" class="action-btn" style="background-color: #e74c3c;">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="groups-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Grupo</th>
+                        <th>Descripción</th>
+                        <th>Miembros</th>
+                        <th>Motivo Salida</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="g : ${listaDeGrupos}">
+                        <td th:text="${g.idGrupo}"></td>
+                        <td th:text="${g.nombre}"></td>
+                        <td th:text="${g.descripcion}"></td>
+                        <td th:text="${g.numMiembros}"></td>
+                        <td th:text="${g.motivoSalida}"></td>
+                        <td>
+                            <a th:href="@{/gruposcrud/editar/{id}(id=${g.idGrupo})}" class="action-btn">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a th:href="@{/gruposcrud/eliminar/{id}(id=${g.idGrupo})}" class="action-btn delete-btn" 
+                               onclick="return confirm('¿Estás seguro de que deseas eliminar este grupo?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(listaDeGrupos)}">
+                        <td colspan="6" style="text-align: center; padding: 20px;">No se encontraron grupos disponibles.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>2026 Tranquil Connect • Panel de Administración</p>
+    </footer>
+</body>
+</html>

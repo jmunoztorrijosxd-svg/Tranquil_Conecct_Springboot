@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tranquil Connect - Perfil en Revisión</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f7f7f7; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .navbar { background: #A0C4FF; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 22px; }
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 500px; }
+        .icon { color: #4975d4; font-size: 60px; margin-bottom: 20px; }
+        h2 { color: #4975d4; margin-bottom: 15px; }
+        p { color: #64748b; line-height: 1.6; }
+        .btn-logout { display: inline-block; margin-top: 25px; padding: 10px 20px; background: #4975d4; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="navbar">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</div>
+    <div class="container">
+        <div class="card">
+            <i class="fas fa-user-clock icon"></i>
+            <h2>¡Gracias por tu registro profesional!</h2>
+            <p>Tu perfil se encuentra actualmente en <strong>proceso de validación</strong>.</p>
+            <p>Nuestros administradores, revisarán tu tarjeta profesional y especialidad. Te notificaremos por correo una vez que tu cuenta sea activada.</p>
+            <a th:href="@{/logout}" class="btn-logout">Cerrar Sesión</a>
+        </div>
+    </div>
+</body>
+</html>

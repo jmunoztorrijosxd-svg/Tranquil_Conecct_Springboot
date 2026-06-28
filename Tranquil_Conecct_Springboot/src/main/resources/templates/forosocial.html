@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foro Social - Tranquil Connect</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: #A0C4FF;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: white;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 65px;
+            width: 65px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Times New Roman", serif;
+        }
+
+        .spacer {
+            flex-grow: 1;
+        }
+
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .auth-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .dashboard-btn,
+        .logout-btn {
+            background-color: #4975d4;
+        }
+
+        /* ===== NUEVO ARREGLO USER ===== */
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .welcome-user {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+        /* ===== SIDEMENU ===== */
+        .side-menu {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 60px;
+            z-index: 200;
+        }
+
+        .side-menu a {
+            padding: 12px 24px;
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-family: "Times New Roman", serif;
+            font-weight: bold;
+        }
+
+        .side-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            flex: 1;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .content h2 {
+            margin-bottom: 5px;
+        }
+
+        .content p {
+            color: #334155;
+        }
+
+        /* ===== POST CARD ===== */
+        .post-card {
+            background: white;
+            width: 92%;
+            max-width: 520px;
+            margin: 20px auto;
+            padding: 18px;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            text-align: left;
+            transition: 0.2s;
+            position: relative; /* REQUERIDO PARA EL MENÚ ABSOLUTO */
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding-right: 30px; /* Evita que el texto choque con los tres puntos */
+        }
+
+        .avatar {
+            height: 45px;
+            width: 45px;
+            background: #A0C4FF;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .post-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        small {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* ===== FORM ===== */
+        textarea {
+            width: 100%;
+            height: 90px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            resize: none;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 12px;
+            background: #A0C4FF;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            transform: scale(1.02);
+        }
+
+        /* ===== MEDIA POST ===== */
+        .post-media img,
+        .post-media video,
+        .post-media audio,
+        .post-media iframe {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .post-media .doc-preview {
+            margin-top: 12px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #eef2ff;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .post-media .doc-preview i {
+            font-size: 28px;
+            color: #3b82f6;
+        }
+
+        .post-media .doc-preview a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .post-media .doc-preview span {
+            display: block;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        /* ===== REACTIONS ===== */
+        .reactions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            padding: 6px 0 8px 0;
+            border-top: 1px solid #e6eefc;
+            align-items: center;
+        }
+
+        /* Each reaction as a square card, evenly spaced across the post */
+        .reaction-btn {
+            border: none;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            flex: 1 1 calc(33.333% - 18px);
+            max-width: calc(33.333% - 18px);
+            height: 96px; /* balanced smaller card */
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            border-radius: 12px;
+            box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+            cursor: pointer;
+            transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms, background 160ms;
+            color: #071033;
+            font-weight: 700;
+            padding: 6px 8px;
+            box-sizing: border-box;
+        }
+
+        .reaction-btn:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+            background: linear-gradient(180deg, #ffffff, #eef6ff);
+        }
+
+        .reaction-emoji {
+            font-size: 44px; /* reduced emoji size for balance */
+            line-height: 1;
+            transform: translateY(-3px);
+        }
+
+        .reaction-count {
+            font-size: 14px;
+            color: #0b1220;
+            transition: transform 200ms ease, color 200ms ease;
+        }
+
+        /* Responsive: stack reactions on narrow screens */
+        @media (max-width: 720px) {
+            .reactions { flex-direction: column; gap: 10px; }
+            .reaction-btn { max-width: 100%; flex: 1 1 auto; height: 96px; }
+            .reaction-emoji { font-size: 32px; }
+            .reaction-count { font-size: 16px; }
+        }
+
+        /* Slightly larger flying emoji for visibility */
+        .emoji-fly {
+            position: absolute;
+            pointer-events: none;
+            font-size: 26px;
+            transform-origin: center;
+            animation: floatUp 900ms cubic-bezier(.2,.8,.2,1) forwards;
+            filter: drop-shadow(0 6px 12px rgba(34, 34, 102, 0.18));
+        }
+
+        /* Pop animation for the button when clicked */
+        .reaction-btn.pop {
+            transform: scale(1.18) translateY(-6px);
+            box-shadow: 0 18px 40px rgba(112,144,255,0.22);
+        }
+
+        .count-animate {
+            transform: scale(1.28);
+            color: #2563eb;
+        }
+
+        /* Flying emoji effect */
+        .emoji-fly {
+            position: absolute;
+            pointer-events: none;
+            font-size: 26px;
+            transform-origin: center;
+            animation: floatUp 900ms cubic-bezier(.2,.8,.2,1) forwards;
+            filter: drop-shadow(0 6px 12px rgba(34, 34, 102, 0.18));
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            60% { transform: translateY(-34px) scale(1.28); }
+            100% { opacity: 0; transform: translateY(-68px) scale(0.9); }
+        }
+
+        /* ===== NUEVOS ESTILOS ESTILO FACEBOOK (TRES PUNTOS) ===== */
+        .post-options-container {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 10;
+        }
+
+        .three-dots-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .three-dots-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .post-actions {
+            display: none; /* Oculto por defecto, se maneja con JS */
+            position: absolute;
+            right: 0;
+            top: 35px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 8px 0;
+            min-width: 130px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .post-actions.show {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            border: none;
+            text-decoration: none;
+            padding: 10px 16px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: transparent;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .edit-btn {
+            color: #4975d4;
+        }
+
+        .delete-btn {
+            color: #ef4444;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover {
+            background: #f8fafc;
+            transform: none;
+            opacity: 1;
+        }
+
+        /* ===== PREVIEW ===== */
+        .preview {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .preview img,
+        .preview video {
+            width: 100%;
+            border-radius: 12px;
+            max-height: 280px;
+            object-fit: cover;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #A0C4FF;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+        }
+
+        /* ===== TRANSITION ===== */
+        .page-transition {
+            position: fixed;
+            inset: 0;
+            background: #A0C4FF;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.35s;
+            z-index: 9999;
+        }
+
+        .page-transition.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+    </style>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sideMenu").style.width = "250px";
+        }
+
+        function closeMenu() {
+            document.getElementById("sideMenu").style.width = "0";
+        }
+
+        function previewFile(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById("preview");
+
+            preview.innerHTML = "";
+            preview.style.display = "block";
+
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+
+            if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = url;
+                preview.appendChild(img);
+            } else if (file.type.startsWith("video/")) {
+                const video = document.createElement("video");
+                video.src = url;
+                video.controls = true;
+                preview.appendChild(video);
+            } else if (file.type.startsWith("audio/")) {
+                const audio = document.createElement("audio");
+                audio.src = url;
+                audio.controls = true;
+                preview.appendChild(audio);
+            } else if (file.type === "application/pdf") {
+                const iframe = document.createElement("iframe");
+                iframe.src = url;
+                iframe.style.width = "100%";
+                iframe.style.height = "420px";
+                iframe.style.border = "1px solid #cbd5e1";
+                iframe.style.borderRadius = "12px";
+                preview.appendChild(iframe);
+            } else {
+                const info = document.createElement("div");
+                info.style.padding = "14px 16px";
+                info.style.background = "#f1f5f9";
+                info.style.border = "1px solid #cbd5e1";
+                info.style.borderRadius = "14px";
+                info.style.color = "#475569";
+                info.style.fontSize = "14px";
+                info.textContent = "Archivo seleccionado: " + file.name;
+                preview.appendChild(info);
+            }
+        }
+
+        // Función para alternar el menú de los 3 puntos
+        function togglePostMenu(button) {
+            document.querySelectorAll('.post-actions').forEach(menu => {
+                if (menu !== button.nextElementSibling) {
+                    menu.classList.remove('show');
+                }
+            });
+            const currentMenu = button.nextElementSibling;
+            currentMenu.classList.toggle('show');
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.matches('.three-dots-btn')) {
+                document.querySelectorAll('.post-actions').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const overlay = document.querySelector(".page-transition");
+
+            document.querySelectorAll("a[href]").forEach(link => {
+                const href = link.getAttribute("href");
+
+                if (href &&
+                    !href.startsWith("#") &&
+                    !href.startsWith("javascript")) {
+
+                    link.addEventListener("click", e => {
+                        e.preventDefault();
+                        overlay.classList.add("active");
+
+                        setTimeout(() => {
+                            window.location.href = link.href;
+                        }, 350);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+<div class="page-transition"></div>
+<div th:if="${mensaje}" id="toast-data" th:data-message="${mensaje}" th:data-type="${toastType != null ? toastType : 'success'}"></div>
+
+<div class="navbar">
+    <button class="menu-btn" onclick="openMenu()">☰</button>
+
+    <div class="logo-container">
+        <img th:src="@{/tranquil_connect_new_logo.png}" class="logo-img">
+        <span class="logo-text">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="auth-links">
+        <div th:if="${usuario}" class="user-section">
+            <div th:if="${usuario.rol == 'ADMIN'}">
+                <a th:href="@{/dashboard}" class="dashboard-btn">
+                    <i class="fas fa-users-cog"></i> Dashboard
+                </a>
+            </div>
+
+            <div class="welcome-user">
+                Hola, <span th:text="${usuario.nombre}"></span>!
+            </div>
+
+            <a th:href="@{/logout}" class="logout-btn">
+                Cerrar Sesión
+            </a>
+        </div>
+
+        <div th:unless="${usuario}">
+            <a th:href="@{/login}">Iniciar Sesión</a>
+            <a th:href="@{/registro}">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+<div id="sideMenu" class="side-menu">
+    <a href="javascript:void(0)" onclick="closeMenu()">✖ Cerrar</a>
+    <a th:href="@{/index}">𝐈𝐧𝐢𝐜𝐢о</a>
+    <a th:href="@{/grupos}">𝐆𝐫𝐮𝐩𝐨𝐬</a>
+    <a th:href="@{/agendar}">𝐀𝐠𝐞𝐧𝐝𝐚𝐫</a>
+    <a th:href="@{/forosocial}">𝐅𝐨𝐫𝐨 𝐒𝐨𝐜𝐢𝐚𝐥</a>
+    <a th:href="@{/desempeno}">𝐃𝐞𝐬𝐞𝐦𝐩𝐞𝐧̃𝐨</a>
+</div>
+
+<div class="content">
+
+    <h2>🌍 Foro social</h2>
+    <p>Comparte tus momentos y recibe apoyo 💙</p>
+
+    <div class="post-card">
+        <form id="publishForm" th:action="@{/publicar}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <div class="post-header">
+                <div class="avatar">✏️</div>
+                <h3>Nueva publicación</h3>
+            </div>
+
+            <textarea id="contenido" name="contenido"
+                      placeholder="¿Qué quieres compartir hoy?"></textarea>
+
+            <div id="contenido-error" class="error-text" style="display:none; margin-top:6px; color:#ef4444; font-size:13px;">El contenido debe tener al menos 2 caracteres si escribes texto, o puedes publicar solo imagen/video.</div>
+
+            <input type="file"
+                   name="file"
+                   accept="image/*,video/*,audio/mpeg,audio/mp3,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                   onchange="previewFile(event)">
+
+            <div class="preview" id="preview"></div>
+
+            <button type="submit">
+                Publicar
+            </button>
+        </form>
+    </div>
+
+    <div th:each="post : ${publicaciones}" class="post-card" th:data-post-id="${post.id}">
+
+        <div class="post-options-container"
+             th:if="${usuario != null and usuario.id == post.usuario.id}">
+            
+            <button class="three-dots-btn" onclick="togglePostMenu(this)">•••</button>
+            
+            <div class="post-actions">
+                <a th:href="@{'/editar-publicacion/' + ${post.id}}"
+                   class="edit-btn">
+                    ✏️ Editar
+                </a>
+
+                <form th:action="@{'/eliminar-publicacion/' + ${post.id}}"
+                      method="post" style="margin: 0; padding: 0;">
+                    <button type="submit"
+                            class="delete-btn"
+                            onclick="return confirm('¿Seguro que deseas eliminar esta publicación?')">
+                        🗑️ Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="post-header">
+            <div class="avatar"
+                 th:text="${post.usuario.nombre.substring(0,1)}">
+            </div>
+
+            <div>
+                <h3 th:text="${post.usuario.nombre}"></h3>
+                <small th:text="${#temporals.format(post.fecha, 'dd/MM/yyyy HH:mm')}"></small>
+            </div>
+        </div>
+
+        <p th:text="${post.contenido}"></p>
+
+        <div th:if="${post.imagen}" class="post-media">
+            <video th:if="${post.imagen.toLowerCase().endsWith('.mp4')
+                        || post.imagen.toLowerCase().endsWith('.webm')
+                        || post.imagen.toLowerCase().endsWith('.mov')}"
+                   controls>
+                <source th:src="@{'/imagenes/' + ${post.imagen}}">
+            </video>
+
+            <audio th:if="${post.imagen.toLowerCase().endsWith('.mp3')
+                        || post.imagen.toLowerCase().endsWith('.wav')
+                        || post.imagen.toLowerCase().endsWith('.mpeg')}"
+                   controls style="margin-top: 10px; width: 100%;">
+                <source th:src="@{'/imagenes/' + ${post.imagen}}">
+            </audio>
+
+            <iframe th:if="${post.imagen.toLowerCase().endsWith('.pdf')}"
+                    th:src="@{'/imagenes/' + ${post.imagen}}"
+                    frameborder="0"
+                    style="height: 420px; width: 100%; margin-top: 10px; border-radius: 12px; border: 1px solid #cbd5e1;">
+            </iframe>
+
+            <div th:if="${post.imagen.toLowerCase().endsWith('.doc')
+                         || post.imagen.toLowerCase().endsWith('.docx')
+                         || post.imagen.toLowerCase().endsWith('.xls')
+                         || post.imagen.toLowerCase().endsWith('.xlsx')}"
+                 class="doc-preview">
+                <i class="fas fa-file-alt"></i>
+                <div>
+                    <a th:href="@{'/imagenes/' + ${post.imagen}}" target="_blank" rel="noopener noreferrer">Abrir documento</a>
+                    <span th:text="${post.imagen}">Documento</span>
+                </div>
+            </div>
+
+            <img th:if="${!(post.imagen.toLowerCase().endsWith('.mp4')
+                          || post.imagen.toLowerCase().endsWith('.webm')
+                          || post.imagen.toLowerCase().endsWith('.mov')
+                          || post.imagen.toLowerCase().endsWith('.mp3')
+                          || post.imagen.toLowerCase().endsWith('.wav')
+                          || post.imagen.toLowerCase().endsWith('.mpeg')
+                          || post.imagen.toLowerCase().endsWith('.pdf')
+                          || post.imagen.toLowerCase().endsWith('.doc')
+                          || post.imagen.toLowerCase().endsWith('.docx')
+                          || post.imagen.toLowerCase().endsWith('.xls')
+                          || post.imagen.toLowerCase().endsWith('.xlsx'))}"
+                 th:src="@{'/imagenes/' + ${post.imagen}}">
+        </div>
+
+        <!-- Reactions: appear below media as three equal buttons -->
+        <div class="reactions">
+            <button class="reaction-btn" data-tipo="love"><span class="reaction-emoji">❤️</span><span class="reaction-count count-love" th:text="${post.transientLoveCount}">0</span></button>
+            <button class="reaction-btn" data-tipo="care"><span class="reaction-emoji">🫂</span><span class="reaction-count count-care" th:text="${post.transientCareCount}">0</span></button>
+            <button class="reaction-btn" data-tipo="haha"><span class="reaction-emoji">😂</span><span class="reaction-count count-haha" th:text="${post.transientHahaCount}">0</span></button>
+        </div>
+    </div>
+
+</div>
+
+<footer class="footer">
+    2026 Tranquil Connect todos los derechos reservados
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+$(document).ready(function() {
+    // Client-side validation for new post content
+    $('#publishForm').on('submit', function(e){
+        var ta = $('#contenido');
+        var err = $('#contenido-error');
+        var val = (ta.val() || '');
+        var trimmed = val.trim();
+        var fileValue = $('input[name="file"]').val();
+        if (trimmed.length === 0 && fileValue.length === 0) {
+            err.text('La publicación debe tener texto o un archivo válido (imagen, video, audio, PDF, Word o Excel).').show();
+            ta.focus();
+            e.preventDefault();
+            return false;
+        }
+        if (trimmed.length > 0 && trimmed.length < 2) {
+            err.text('El texto debe tener al menos 2 caracteres.').show();
+            ta.focus();
+            e.preventDefault();
+            return false;
+        }
+        err.hide();
+    });
+
+    $('#contenido').on('input', function(){
+        var err = $('#contenido-error');
+        var text = $(this).val().trim();
+        var fileValue = $('input[name="file"]').val();
+        if ((text.length >= 2) || (text.length === 0 && fileValue.length > 0)) {
+            err.hide();
+        }
+    });
+
+    $('.reaction-btn').on('click', function() {
+        let boton = $(this);
+        let tipoReaccion = boton.data('tipo'); 
+        let publicacionId = boton.closest('.post-card').data('post-id');
+
+        $.ajax({
+            url: "/api/publicacion/reaccionar",
+            type: "POST",
+            data: {
+                'publicacion_id': publicacionId,
+                'tipo_reaccion': tipoReaccion
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    let contenedor = boton.closest('.post-card');
+                    
+                    // Actualizar dinámicamente los números de los emojis en este post específico
+                    contenedor.find('.count-love').text(response.conteos.love);
+                    contenedor.find('.count-care').text(response.conteos.care);
+                    contenedor.find('.count-haha').text(response.conteos.haha);
+
+                    // Animaciones juicy
+                    // 1) Animar el contador específico
+                    let contador = contenedor.find('.count-' + tipoReaccion);
+                    contador.addClass('count-animate');
+                    setTimeout(function(){ contador.removeClass('count-animate'); }, 700);
+
+                    // 2) Pop botón
+                    boton.addClass('pop');
+                    setTimeout(function(){ boton.removeClass('pop'); }, 450);
+
+                    // 3) Emoji volador que sube y desaparece
+                    // Extraer el emoji desde .reaction-emoji si existe
+                    let emojiChar = boton.find('.reaction-emoji').text().trim() || boton.text().trim().split(' ')[0];
+                    let fly = $('<span class="emoji-fly">'+emojiChar+'</span>');
+
+                    // Posicionar respecto al contenedor .post-card (que es relative)
+                    let btnPos = boton.position();
+                    let flyLeft = btnPos.left + boton.outerWidth() / 2 - 12;
+                    let flyTop = btnPos.top - 8;
+                    fly.css({ left: flyLeft + 'px', top: flyTop + 'px' });
+
+                    contenedor.append(fly);
+
+                    setTimeout(function(){ fly.remove(); }, 900);
+
+                } else {
+                    alert("Inicia sesión para poder reaccionar a las publicaciones");
+                    console.error("Error devuelto: ", response.message);
+                }
+            },
+            error: function(xhr) {
+                console.error("Error en la petición AJAX de reacciones", xhr.responseText);
+            }
+        });
+    });
+
+    function showToastMessage() {
+        const toastNode = document.getElementById('toast-data');
+        if (!toastNode) return;
+
+        const mensaje = toastNode.dataset.message;
+        const tipo = toastNode.dataset.type || 'success';
+
+        Toastify({
+            text: mensaje,
+            duration: 4000,
+            close: true,
+            gravity: 'top',
+            position: 'right',
+            backgroundColor: tipo === 'success' ? '#22c55e' : '#f97316',
+            stopOnFocus: true,
+        }).showToast();
+    }
+
+    showToastMessage();
+});
+</script>
+
+</body>
+</html>

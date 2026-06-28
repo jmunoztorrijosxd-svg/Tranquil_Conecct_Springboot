@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar Contraseña - Tranquil Connect</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .card h2 { color: #4975d4; margin-bottom: 20px; }
+        p { color: #555; font-size: 14px; line-height: 1.5; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #A0C4FF; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #4975d4; }
+        .back-link { display: block; margin-top: 15px; color: #666; text-decoration: none; font-size: 14px; }
+        .error { color: #d93025; background: #fce8e6; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Recuperar Cuenta</h2>
+
+        <div th:if="${paso2 == null}">
+            <p>Introduce tu correo electrónico para recibir un código de seguridad de 6 dígitos.</p>
+            <form th:action="@{/enviar-codigo}" method="post">
+                <input type="email" name="correo" placeholder="Tu correo electrónico" required>
+                <button type="submit">Enviar Código</button>
+            </form>
+        </div>
+
+        <div th:if="${paso2}">
+            <p>Hemos enviado un código a: <br><strong th:text="${correo}"></strong></p>
+            <form th:action="@{/verificar-y-cambiar}" method="post">
+                <input type="hidden" name="correo" th:value="${correo}">
+                
+                <input type="text" name="codigo" placeholder="Introduce el código de 6 dígitos" required maxlength="6">
+                <input type="password" name="nuevaClave" placeholder="Tu nueva contraseña" required>
+                
+                <button type="submit">Restablecer Contraseña</button>
+            </form>
+        </div>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+        
+        <a th:href="@{/login}" class="back-link">← Volver al Login</a>
+    </div>
+</body>
+</html>

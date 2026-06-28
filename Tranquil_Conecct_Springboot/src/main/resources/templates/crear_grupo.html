@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nuevo Grupo - Tranquil Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #4975d4;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .btn-submit {
+            background: #A0C4FF;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-submit:hover {
+            background: #4975d4;
+        }
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #888;
+            font-size: 14px;
+        }
+        .btn-back:hover {
+            color: #4975d4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2><i class="fas fa-users"></i> Nuevo Grupo</h2>
+    
+    <form th:action="@{/grupos/guardar}" th:object="${nuevoGrupo}" method="post">
+        
+        <div class="form-group">
+            <label for="nombre">Nombre del Grupo:</label>
+            <input type="text" 
+                   id="nombre" 
+                   th:field="*{nombre}" 
+                   name="nombre" 
+                   placeholder="Ej: Apoyo Ansiedad" 
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" 
+                      th:field="*{descripcion}" 
+                      name="descripcion" 
+                      placeholder="¿De qué trata este grupo?" 
+                      required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Crear Grupo</button>
+    </form>
+
+    <a th:href="@{/grupos}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Volver a Grupos
+    </a>
+</div>
+
+</body>
+</html>

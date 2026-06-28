@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Perfil - Tranquil Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary-color: #4975d4; --secondary-color: #A0C4FF; --bg-color: #f0f4f8; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); margin: 0; }
+        .navbar { background: var(--secondary-color); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        .btn-save:hover { background: #3a5eb1; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 8px; text-align: center; }
+        .alert-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕 | Editar Perfil</div>
+        <a th:href="@{/usuarios/perfil}" style="color: white; text-decoration: none;"><i class="fas fa-user"></i> Mi Perfil</a>
+    </div>
+
+    <div class="container">
+        <h2 th:text="${titulo}">Mi Perfil</h2>
+
+        <div th:if="${mensaje}" class="alert alert-success" th:text="${mensaje}"></div>
+
+        <form th:action="@{/usuarios/perfil/guardar}" th:object="${usuarioAEditar}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-group">
+                <label>Nombre Completo:</label>
+                <input type="text" th:field="*{nombre}" required>
+            </div>
+
+            <div class="form-group">
+    <label>Correo Electrónico:</label>
+    <input type="email" th:field="*{correo}" required>
+</div>
+
+            <div class="form-group">
+                <label>Teléfono:</label>
+                <input type="text" th:field="*{telefono}">
+            </div>
+
+            <div class="form-group">
+                <label>Especialidad:</label>
+                <input type="text" th:field="*{especialidad}" placeholder="Ej: Psicología Clínica">
+            </div>
+
+            <div class="form-group">
+                <label>Tarjeta Profesional:</label>
+                <input type="text" th:field="*{tarjetaProfesional}">
+            </div>
+
+            <div class="form-group">
+                <label>Género:</label>
+                <select th:field="*{genero}">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Guardar Cambios</button>
+            <a th:href="@{/dashboard-psicologo}" style="display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none;">Volver al Dashboard</a>
+        </form>
+    </div>
+
+</body>
+</html>

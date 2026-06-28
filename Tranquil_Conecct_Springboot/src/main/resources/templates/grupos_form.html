@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Grupo - Tranquil Connect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            color: #4975d4;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-save {
+            background-color: #38b000;
+            color: white;
+        }
+        .btn-save:hover { background-color: #2d8c00; }
+        .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-cancel:hover { background-color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2 th:text="${grupo.idGrupo == null} ? 'Crear Nuevo Grupo' : 'Editar Grupo'">Formulario de Grupo</h2>
+    
+    <form th:action="@{/gruposcrud/guardar}" th:object="${grupo}" method="post">
+        <input type="hidden" th:field="*{idGrupo}" />
+
+        <div class="form-group">
+            <label>Nombre del Grupo:</label>
+            <input type="text" th:field="*{nombre}" placeholder="Ej. Apoyo Ansiedad" required />
+        </div>
+
+        <div class="form-group">
+            <label>Descripción:</label>
+            <textarea th:field="*{descripcion}" placeholder="Breve descripción del grupo..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Número de Miembros:</label>
+            <input type="number" th:field="*{numMiembros}" min="0" />
+        </div>
+
+        <div class="form-group">
+            <label>Motivo de Salida (Opcional):</label>
+            <input type="text" th:field="*{motivoSalida}" placeholder="Motivo general de cierre o salida" />
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            <a th:href="@{/gruposcrud}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

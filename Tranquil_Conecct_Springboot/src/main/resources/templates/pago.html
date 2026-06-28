@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecciona tu método de pago</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#f5f5f5;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:30px 15px;
+        }
+
+        .container{
+            width:100%;
+            max-width:650px;
+            background:white;
+            border-radius:16px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.08);
+            overflow:hidden;
+        }
+
+        .header{
+            background:#A0C4FF; /*color transquil connect*/
+            padding:30px;
+        }
+
+        .header h1{
+            font-size:28px;
+            color:#333;
+            margin-bottom:8px;
+        }
+
+        .header p{
+            color:#555;
+            font-size:15px;
+        }
+
+        .contenido{
+            padding:25px;
+        }
+
+        .titulo{
+            font-size:20px;
+            margin-bottom:25px;
+            color:#333;
+        }
+
+        form{
+            margin-bottom:15px;
+        }
+
+        .metodo{
+            width:100%;
+            border:1px solid #e5e5e5;
+            border-radius:14px;
+            background:white;
+            cursor:pointer;
+            transition:all 0.25s ease;
+            padding:18px;
+        }
+
+        .metodo:hover{
+            border-color:#3483fa;
+            box-shadow:0 6px 18px rgba(52,131,250,0.20);
+            transform:translateY(-2px);
+        }
+
+        .contenido-metodo{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+
+        .info{
+            display:flex;
+            align-items:center;
+            gap:18px;
+        }
+
+        .logo{
+            width:70px;
+            height:70px;
+            object-fit:contain;
+            flex-shrink:0;
+        }
+
+        .texto h3{
+            color:#333;
+            font-size:18px;
+            margin-bottom:6px;
+            text-align:left;
+        }
+
+        .texto p{
+            color:#666;
+            font-size:14px;
+            text-align:left;
+        }
+
+        .flecha{
+            font-size:30px;
+            color:#999;
+        }
+
+        .seguridad{
+            margin-top:30px;
+            padding:20px;
+            background:#f8f9fa;
+            border-radius:12px;
+            border:1px solid #ececec;
+            color:#555;
+            line-height:1.6;
+            font-size:14px;
+        }
+
+        .seguridad strong{
+            color:#333;
+        }
+
+        @media(max-width:600px){
+
+            .contenido-metodo{
+                gap:15px;
+            }
+
+            .logo{
+                width:55px;
+                height:55px;
+            }
+
+            .texto h3{
+                font-size:16px;
+            }
+
+            .texto p{
+                font-size:13px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>💳 Métodos de pago</h1>
+        <p>Elige cómo deseas pagar tu cita de forma segura.</p>
+    </div>
+
+    <div class="contenido">
+
+        <h2 class="titulo">Selecciona una opción</h2>
+
+        <!-- PayPal -->
+<form action="/confirmar-pago" method="post">
+    <button type="submit">Pagar</button>
+</form>
+
+
+        <div class="seguridad">
+            🔒 <strong>Pago seguro</strong><br><br>
+            Tus datos están protegidos y solo se utilizarán para completar la reserva de tu cita.
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

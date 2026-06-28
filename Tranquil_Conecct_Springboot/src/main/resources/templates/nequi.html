@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago con Nequi</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#f5f5f5;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:500px;
+            background:white;
+            padding:30px;
+            border-radius:16px;
+            box-shadow:0 4px 20px rgba(0,0,0,.1);
+        }
+
+        h1{
+            margin-bottom:20px;
+        }
+
+        label{
+            display:block;
+            margin-top:15px;
+            margin-bottom:5px;
+            font-weight:bold;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            border:1px solid #ccc;
+            border-radius:8px;
+        }
+
+        button{
+            width:100%;
+            margin-top:25px;
+            padding:14px;
+            border:none;
+            border-radius:10px;
+            background:#7d1fff;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#6517d1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Pago con Nequi</h1>
+
+    <form th:action="@{/confirmar-cita}" method="post">
+
+        <input type="hidden" name="metodoPago" value="nequi">
+
+        <label>Número de Nequi</label>
+        <input type="tel"
+               name="numeroNequi"
+               pattern="[0-9]{10}"
+               placeholder="3001234567"
+               required>
+
+        <label>Nombre del titular</label>
+        <input type="text"
+               name="titular"
+               required>
+
+        <button type="submit">
+            Confirmar cita
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
