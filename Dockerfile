@@ -1,18 +1,18 @@
 # ETAPA 1: Construcción (Spring Boot)
 FROM maven:3.8.8-eclipse-temurin-17 AS builder
 WORKDIR /app
-# Asegúrate de que las rutas coincidan exactamente con tu repositorio
 COPY ./Tranquil_Conecct_Springboot/pom.xml .
 COPY ./Tranquil_Conecct_Springboot/src ./src
 RUN mvn clean package -DskipTests -q
 
 # ETAPA 2: Imagen Final
-FROM python:3.12-slim
+# Cambiamos a esta base que ya tiene Java 17 y es estable (Ubuntu 22.04)
+FROM eclipse-temurin:17-jre-jammy
 
-# Instalación de dependencias (Java, Nginx, y librerías)
-# Usamos 'openjdk-17-jdk-headless' que es más estándar en entornos Docker
+# Instalamos Python, Nginx y dependencias de sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openjdk-17-jdk-headless \
+    python3 \
+    python3-pip \
     nginx \
     default-libmysqlclient-dev \
     build-essential \
@@ -24,14 +24,16 @@ WORKDIR /app
 # Copiar el código de Django
 COPY ./Tranquil_Connect_Django /app/django
 
-# Copiar el JAR compilado desde la etapa anterior
+# Copiar el JAR construido desde la etapa anterior
 COPY --from=builder /app/target/*.jar /app/app.jar
 
-# Copiar configuración de Nginx
+# Configuración Nginx
 COPY ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 
-# Instalar dependencias de Python
-RUN pip install --no-cache-dir -r /app/django/requirements.txt gunicorn
+# Instalación de dependencias de Python
+# Nota: En esta imagen, usamos pip3 directamente
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r /app/django/requirements.txt gunicorn
 
 # Script de inicio
 COPY entrypoint.sh /entrypoint.sh
