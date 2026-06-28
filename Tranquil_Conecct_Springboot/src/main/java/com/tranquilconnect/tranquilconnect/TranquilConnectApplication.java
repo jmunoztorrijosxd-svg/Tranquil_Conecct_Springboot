@@ -25,12 +25,12 @@ public class TranquilConnectApplication {
     CommandLineRunner initDatabase(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             // Cambia 'admin@tranquilconnect.com' por el correo que quieras
-            if (usuarioRepository.findByEmail("admin@tranquilconnect.com").isEmpty()) {
+            if (usuarioRepository.findByCorreo("admin@tranquilconnect.com").isEmpty()) {
                 Usuario admin = new Usuario();
-                admin.setEmail("jmunoztorrijosxd@gmail.com");
+                admin.setCorreo("jmunoztorrijosxd@gmail.com");
                 // IMPORTANTE: Asegúrate de tener un PasswordEncoder configurado en tu proyecto
                 admin.setPassword(passwordEncoder.encode("12345678")); 
-                admin.setRole("ROLE_ADMIN");
+                admin.setRol("ADMIN");
                 
                 usuarioRepository.save(admin);
                 System.out.println("✅ Administrador creado exitosamente en la base de datos.");
