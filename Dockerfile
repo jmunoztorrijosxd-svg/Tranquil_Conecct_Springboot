@@ -1,26 +1,31 @@
 # ETAPA 1: Construir la aplicación Spring Boot
 FROM maven:3.8.8-eclipse-temurin-17 AS builder
 WORKDIR /app
-# Ajustamos las rutas a tu estructura actual
+# Copia los archivos necesarios desde la subcarpeta
 COPY ./Tranquil_Conecct_Springboot/pom.xml .
 COPY ./Tranquil_Conecct_Springboot/src ./src
 RUN mvn clean package -DskipTests -q
 
 # ETAPA 2: Imagen Final
 FROM python:3.12-slim
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jre \
+
+# Instalación de dependencias (Java, Nginx, y librerías de sistema)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-17-jdk-headless \
     nginx \
     default-libmysqlclient-dev \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-# Copiar código de Django
+
+# Copiar el código de Django
 COPY ./Tranquil_Connect_Django /app/django
-# Copiar el JAR compilado
+
+# Copiar el JAR compilado desde la etapa anterior
 COPY --from=builder /app/target/*.jar /app/app.jar
-# Copiar configuración de Nginx (asegúrate que esté en Tranquil_connect/nginx/nginx.prod.conf)
+
+# Copiar configuración de Nginx
 COPY ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
 
 # Instalar dependencias de Python
