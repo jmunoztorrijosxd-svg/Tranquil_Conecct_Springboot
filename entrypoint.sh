@@ -1,15 +1,21 @@
 #!/bin/sh
-# 1. Iniciar Spring Boot en segundo plano (escuchando en 8090)
-# Cambia tu línea de ejecución de java por esta:
+
+# 1. Configurar Nginx dinámicamente para usar el puerto que Render asigna
+# Esto reemplaza el puerto 80 dentro de tu nginx.conf con el puerto que Render espera
+sed -i "s/listen 80;/listen $PORT;/" /etc/nginx/conf.d/default.conf
+
+echo "Iniciando Spring Boot..."
 java -Dspring.datasource.url="jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true" \
      -Dspring.datasource.username="${DB_USER}" \
      -Dspring.datasource.password="${DB_PASSWORD}" \
-     -jar /app/app.jar &
+     -jar /app/app.jar > /var/log/springboot.log 2>&1 &
 
-# 2. Iniciar Django en segundo plano (escuchando en 127.0.0.1:8000)
-# Es vital usar 127.0.0.1 en lugar de 0.0.0.0 para que solo Nginx acceda
-cd /app/django && gunicorn tranquil_connect.wsgi:application --bind 127.0.0.1:8000 &
+echo "Iniciando Django (Gunicorn)..."
+cd /app/django && gunicorn tranquil_connect.wsgi:application \
+    --bind 127.0.0.1:8000 \
+    --workers 3 \
+    --timeout 120 > /var/log/gunicorn.log 2>&1 &
 
-# 3. Iniciar Nginx en primer plano
-# Esto mantendrá el contenedor vivo
+echo "Iniciando Nginx en el puerto $PORT..."
+# Nginx debe ser el proceso final (en primer plano) para mantener el contenedor activo
 nginx -g "daemon off;"
