@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # BASE DE DATOS - MYSQL 8.0
+  # ============================================
+  db:
+    image: mysql:8.0
+    container_name: tranquil_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_HOST: ${MYSQL_ROOT_HOST}
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=1000
+      - --max_allowed_packet=256M
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+    networks:
+      - tranquil_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================
+  # BACKEND - SPRING BOOT (Puerto 8090)
+  # ============================================
+  springboot-app:
+    build:
+      context: ./Tranquil_Conecct_Springboot
+      dockerfile: Dockerfile
+    container_name: tranquil_springboot
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      - SERVER_PORT=${SERVER_PORT}
+      - SERVER_SERVLET_CONTEXT_PATH=${SERVER_SERVLET_CONTEXT_PATH}
+    networks:
+      - tranquil_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/"]
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================
+  # BACKEND - DJANGO (Puerto 8000)
+  # ============================================
+  django-app:
+    build:
+      context: ./Tranquil_Connect_Django
+      dockerfile: Dockerfile
+    container_name: tranquil_django
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+      - DJANGO_PORT=${DJANGO_PORT}
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "python manage.py migrate && 
+             gunicorn tranquil_connect.wsgi:application --bind 0.0.0.0:8000 --workers 4 --worker-class sync --timeout 120"
+    networks:
+      - tranquil_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/ || exit 1"]
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================
+  # PROXY REVERSO - NGINX (Puerto 80/443)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: tranquil_nginx
+    restart: always
+    depends_on:
+      - springboot-app
+      - django-app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/cache:/var/cache/nginx
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - NGINX_WORKER_PROCESSES=${NGINX_WORKER_PROCESSES}
+      - NGINX_CLIENT_MAX_BODY_SIZE=${NGINX_CLIENT_MAX_BODY_SIZE}
+    networks:
+      - tranquil_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  tranquil_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

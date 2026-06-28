@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+
+        /* Eliminamos márgenes del body */
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* =========================
+           HEADER SUPERIOR
+        ========================== */
+        .top-bar{
+            background: #3b82f6;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .top-left{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .top-left a{
+            color:white;
+            text-decoration:none;
+            font-size:20px;
+        }
+
+        .btn-miembros{
+            background:white;
+            color:#3b82f6;
+            padding:8px 14px;
+            border-radius:10px;
+            text-decoration:none;
+            font-size:13px;
+            font-weight:bold;
+        }
+
+        .btn-miembros:hover{
+            background:#eff6ff;
+        }
+
+        /* =========================
+           ÁREA MENSAJES
+        ========================== */
+        .message-area {
+            flex-grow: 1;
+            padding: 15px 20px;
+            overflow-y: auto;
+            background-color: #f0f4f9;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message {
+            max-width: 75%;
+            margin: 4px 0;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            position: relative;
+            line-height: 1.45;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+        }
+
+        .delete-btn {
+            display: none;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: transparent;
+            border: none;
+            color: rgba(0,0,0,0.6);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .message:hover .delete-btn { display: block; }
+
+        .sent {
+            align-self: flex-end;
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .received {
+            align-self: flex-start;
+            background-color: #ffffff;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+        }
+
+        .received .user-name {
+            color: #1e293b;
+        }
+
+        .sent .user-name {
+            color: #eff6ff;
+            opacity: 0.95;
+        }
+
+        .chat-img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .message-info {
+            font-size: 11px;
+            text-align: right;
+            margin-top: 6px;
+            opacity: 0.75;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        /* =========================
+           INPUT CHAT
+        ========================== */
+        .input-area {
+            display: flex;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 16px;
+            border-radius: 24px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            font-size: 14px;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+            color: #334155;
+        }
+
+        .input-area input[type="text"]:focus {
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-send {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.1s;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .btn-send:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .btn-send:active {
+            transform: scale(0.95);
+        }
+
+        #file-label {
+            color: #64748b;
+            font-size: 20px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #file-label:hover,
+        #record-btn:hover {
+            background-color: #f1f5f9;
+            color: #3b82f6;
+        }
+
+        #record-btn {
+            color: #64748b;
+            font-size: 20px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #file-preview {
+            width: 100%;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #file-preview img,
+        #file-preview video,
+        #file-preview audio,
+        #file-preview iframe {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            max-height: 320px;
+            object-fit: cover;
+        }
+
+        .doc-preview {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .doc-preview i {
+            font-size: 20px;
+            color: #3b82f6;
+        }
+
+        .doc-preview a {
+            color: #1f2937;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .doc-preview span {
+            font-size: 13px;
+            color: #475569;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="top-bar">
+    <div class="top-left">
+        <a href="http://localhost:8090/grupos">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+        <span>Sala de Chat</span>
+    </div>
+    
+    <a class="btn-miembros" href="http://localhost:8090/grupo/{{ grupo_id }}/miembros">>
+        <i class="fa-solid fa-users"></i> Ver miembros
+    </a>
+</div>
+
+    <div class="message-area" id="message-area">
+
+
+        {% for mensaje in mensajes %}
+
+            <div class="message {% if mensaje.id_usuario.id|slugify == usuario_id_actual|slugify %}sent{% else %}received{% endif %}" data-mensaje-id="{{ mensaje.id }}">
+
+                <div class="user-name"
+                     style="
+                        font-size: 12px;
+                        font-weight: 600;
+                        margin-bottom: 3px;
+                     ">
+
+                    {{ mensaje.id_usuario.nombre }}
+
+                </div>
+
+                {% if mensaje.contenido %}
+
+                    <div style="word-break: break-word;">
+                        {{ mensaje.contenido }}
+                    </div>
+
+                {% endif %}
+
+                {% if mensaje.imagen_url %}
+                    {% with filename=mensaje.imagen_url.name|lower %}
+                        {% if ".mp4" in filename or ".webm" in filename or ".mov" in filename %}
+                            <video src="{{ mensaje.imagen_url.url }}" controls class="chat-img"></video>
+                        {% elif ".mp3" in filename or ".wav" in filename or ".ogg" in filename or ".mpeg" in filename %}
+                            <audio src="{{ mensaje.imagen_url.url }}" controls style="width:100%; margin-top:10px;"></audio>
+                        {% elif ".pdf" in filename %}
+                            <iframe src="{{ mensaje.imagen_url.url }}" frameborder="0" style="width:100%; height:320px; margin-top:10px; border-radius:12px; border:1px solid #cbd5e1;"></iframe>
+                        {% elif ".doc" in filename or ".docx" in filename or ".xls" in filename or ".xlsx" in filename %}
+                            <div class="doc-preview">
+                                <i class="fa-solid fa-file"></i>
+                                <div>
+                                    <a href="{{ mensaje.imagen_url.url }}" target="_blank" rel="noopener noreferrer">{{ mensaje.imagen_url.name }}</a>
+                                    <span>Documento adjunto</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <img src="{{ mensaje.imagen_url.url }}" class="chat-img">
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+
+                <div class="message-info">
+
+                    <span>
+                        {{ mensaje.fecha_envio|date:"H:i" }}
+                    </span>
+
+                    {% if mensaje.id_usuario.id|slugify == usuario_id_actual|slugify %}
+
+                        <i class="fa-solid fa-check-double" style="color: #eff6ff;"></i>
+                        <!-- Botón eliminar (visible solo para mensajes propios) -->
+                        <button class="delete-btn" data-id="{{ mensaje.id }}" title="Eliminar mensaje" style="background:transparent;border:0;color:rgba(255,255,255,0.9);margin-left:8px;cursor:pointer;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin-top: 40px;
+                gap: 8px;
+                color: #94a3b8;
+            ">
+
+                <i class="fa-regular fa-comments"
+                   style="font-size: 28px;"></i>
+
+                <p style="
+                    text-align: center;
+                    font-size: 13px;
+                    margin: 0;
+                ">
+
+                    No hay mensajes aún.
+                    ¡Sé el primero en escribir!
+
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+    <form id="form-chat"
+          class="input-area"
+          method="POST"
+          enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="usuario_id"
+               value="{{ usuario_id_actual }}">
+
+        <div style="display:flex; align-items:center; gap: 6px;">
+            <label for="file-input"
+                   id="file-label"
+                   title="Adjuntar archivo">
+                <i class="fa-solid fa-paperclip"></i>
+            </label>
+
+            <button type="button"
+                    id="record-btn"
+                    title="Grabar audio">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
+
+        <input
+            type="file"
+            name="imagen"
+            id="file-input"
+            style="display: none;"
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+        >
+
+        <div id="file-preview"></div>
+
+        <input
+            type="text"
+            name="contenido"
+            id="message-input"
+            placeholder="Escribe un mensaje..."
+            autocomplete="off"
+        >
+
+        <button type="submit"
+                class="btn-send">
+
+            <i class="fa-solid fa-paper-plane"></i>
+
+        </button>
+
+    </form>
+
+    <script>
+
+        // Scroll automático al final
+        const messageArea = document.getElementById('message-area');
+        messageArea.scrollTop = messageArea.scrollHeight;
+
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const recordBtn = document.getElementById('record-btn');
+        const formChat = document.getElementById('form-chat');
+
+        // status element (inserted next to record button)
+        const statusEl = document.createElement('span');
+        statusEl.style.marginLeft = '8px';
+        statusEl.style.fontSize = '13px';
+        statusEl.style.color = '#334155';
+        statusEl.textContent = '';
+        recordBtn.parentNode.insertBefore(statusEl, recordBtn.nextSibling);
+
+        function showPreview(file) {
+            filePreview.innerHTML = '';
+            filePreview.style.display = 'block';
+            const url = URL.createObjectURL(file);
+
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = url;
+                filePreview.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = url;
+                video.controls = true;
+                filePreview.appendChild(video);
+            } else if (file.type.startsWith('audio/')) {
+                const audio = document.createElement('audio');
+                audio.src = url;
+                audio.controls = true;
+                filePreview.appendChild(audio);
+            } else if (file.type === 'application/pdf') {
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.style.height = '320px';
+                filePreview.appendChild(iframe);
+            } else {
+                const box = document.createElement('div');
+                box.className = 'doc-preview';
+                box.innerHTML = `
+                    <i class="fa-solid fa-file"></i>
+                    <div>
+                        <a href="${url}" target="_blank" rel="noopener noreferrer">${file.name}</a>
+                        <span>Previsualización de documento</span>
+                    </div>
+                `;
+                filePreview.appendChild(box);
+            }
+        }
+
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                showPreview(file);
+            } else {
+                filePreview.style.display = 'none';
+                filePreview.innerHTML = '';
+            }
+        });
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let currentStream = null;
+
+        async function getSupportedMime() {
+            if (typeof MediaRecorder === 'undefined') return null;
+            if (MediaRecorder.isTypeSupported) {
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus';
+                if (MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm';
+                if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) return 'audio/ogg;codecs=opus';
+                if (MediaRecorder.isTypeSupported('audio/ogg')) return 'audio/ogg';
+            }
+            return null;
+        }
+
+        async function checkMicrophonePermission() {
+            try {
+                if (!navigator.permissions) return 'prompt';
+                const status = await navigator.permissions.query({ name: 'microphone' });
+                return status.state; // 'granted' | 'denied' | 'prompt'
+            } catch (e) {
+                return 'prompt';
+            }
+        }
+
+        recordBtn.addEventListener('click', async function () {
+            // toggle stop
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                statusEl.textContent = 'Deteniendo...';
+                mediaRecorder.stop();
+                return;
+            }
+
+            if (typeof MediaRecorder === 'undefined') {
+                alert('Tu navegador no soporta la API de grabación (MediaRecorder).');
+                return;
+            }
+
+            const perm = await checkMicrophonePermission();
+            if (perm === 'denied') {
+                statusEl.textContent = 'Permiso de micrófono denegado. Revisa configuración del sitio.';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                currentStream = stream;
+                const mime = await getSupportedMime();
+                const options = mime ? { mimeType: mime } : undefined;
+                try {
+                    mediaRecorder = options ? new MediaRecorder(stream, options) : new MediaRecorder(stream);
+                } catch (e) {
+                    mediaRecorder = new MediaRecorder(stream);
+                }
+
+                audioChunks = [];
+                recordBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+                recordBtn.title = 'Detener grabación';
+                statusEl.textContent = 'Grabando...';
+
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    if (event.data && event.data.size > 0) audioChunks.push(event.data);
+                });
+
+                mediaRecorder.addEventListener('stop', () => {
+                    const finalMime = options && options.mimeType ? options.mimeType.split(';')[0] : 'audio/webm';
+                    const extension = finalMime.includes('ogg') ? 'ogg' : (finalMime.includes('webm') ? 'webm' : 'wav');
+                    const audioBlob = new Blob(audioChunks, { type: finalMime });
+                    const file = new File([audioBlob], `grabacion-${Date.now()}.${extension}`, { type: finalMime });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    showPreview(file);
+                    recordBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                    recordBtn.title = 'Grabar audio';
+                    statusEl.textContent = 'Grabación lista';
+                    // stop tracks
+                    if (currentStream) {
+                        currentStream.getTracks().forEach(t => t.stop());
+                        currentStream = null;
+                    }
+                });
+
+                mediaRecorder.start();
+            } catch (error) {
+                console.error('Error getUserMedia / MediaRecorder:', error);
+                statusEl.textContent = 'Error accediendo al micrófono.';
+                alert('No se pudo acceder al micrófono. Revisa permisos y prueba de nuevo.');
+            }
+        });
+
+        // Eliminar mensaje (delegación)
+        const CURRENT_USER_ID = '{{ usuario_id_actual }}';
+        document.getElementById('message-area').addEventListener('click', async (e) => {
+            const btn = e.target.closest('.delete-btn');
+            if (!btn) return;
+            const mensajeId = btn.getAttribute('data-id');
+            if (!mensajeId) return;
+
+            if (!confirm('¿Eliminar este mensaje?')) return;
+
+            try {
+                const fd = new FormData();
+                fd.append('mensaje_id', mensajeId);
+                fd.append('usuario_id', CURRENT_USER_ID);
+
+                const res = await fetch('/chat/delete_message/', {
+                    method: 'POST',
+                    body: fd
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    const el = document.querySelector(`[data-mensaje-id="${mensajeId}"]`);
+                    if (el) el.remove();
+                    statusEl.textContent = 'Mensaje eliminado';
+                } else {
+                    alert(data.error || 'No se pudo eliminar el mensaje');
+                }
+            } catch (err) {
+                console.error('Error eliminando mensaje:', err);
+                alert('Error de red al eliminar el mensaje');
+            }
+        });
+    </script>
+
+</body>
+</html>

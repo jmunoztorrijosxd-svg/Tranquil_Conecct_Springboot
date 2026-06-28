@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Moderación de Publicaciones | Tranquil Connect</title>
+    <style>
+        :root {
+            --primary-blue: #a0c4ff;
+            --dark-blue: #4a90e2;
+            --btn-blue: #4a7cf5;
+            --bg-light: #f8faff;
+            --header-blue: #8fb9ff;
+            --danger-red: #d32f2f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: var(--header-blue);
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-style: italic;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-btns { display: flex; gap: 10px; }
+        .btn-nav {
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-home { background-color: #4a7cf5; color: white; }
+        .btn-logout { background-color: #ff6b6b; color: white; }
+        .btn-nav:hover { opacity: 0.9; }
+
+        .main-container {
+            flex: 1;
+            max-width: 1300px;
+            margin: 40px auto;
+            width: 95%;
+        }
+
+        .title-section {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* --- BARRA DE BÚSQUEDA Y FILTROS --- */
+        .search-container {
+            background-color: #f1f7ff;
+            padding: 20px;
+            border: 1px solid #d1e3ff;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .search-form { display: flex; gap: 10px; flex-grow: 1; }
+        .input-search {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 300px;
+            outline: none;
+        }
+        .input-search:focus { border-color: var(--dark-blue); }
+
+        .btn-search { background-color: #4a7cf5; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: bold; }
+        .btn-clear { background-color: #94a3b8; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; }
+
+        .export-btns { display: flex; gap: 8px; }
+        .btn-export {
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.1s;
+        }
+        .btn-export:active { transform: scale(0.95); }
+        .excel { background-color: #1e7e34; }
+        .pdf { background-color: #dc3545; }
+
+        /* --- TABLA --- */
+        .table-wrapper {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: var(--primary-blue); color: white; }
+        th { padding: 15px; font-size: 0.85rem; text-transform: uppercase; text-align: left; letter-spacing: 0.5px; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.95rem; color: #444; vertical-align: middle; }
+        tr:hover { background-color: #f9fbff; }
+
+        .media-preview {
+            width: 180px;
+            height: 110px;
+            background: #fdfdfd;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .media-preview img, .media-preview video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        .btn-action-del {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+        .btn-action-del:hover { background-color: var(--danger-red); }
+
+        .user-badge {
+            background: #eef2ff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: var(--dark-blue);
+            border: 1px solid #d1e3ff;
+            font-size: 0.85rem;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#a0c4ff,#4a7cf5);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .user-id {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        footer {
+            background-color: var(--primary-blue);
+            color: white;
+            text-align: center;
+            padding: 18px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1>🏞️ 𝑻𝒓𝒂𝒏𝒒𝒖𝒊𝒍 𝑪𝒐𝒏𝒏𝒆𝒄𝒕</h1>
+        <div class="nav-btns">
+            <a href="/index" class="btn-nav btn-home">🏠 Volver al Inicio</a>
+            <a href="/logout" class="btn-nav btn-logout" style="text-decoration: none; display: inline-block; text-align: center;">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <h2 class="title-section">Moderación de Publicaciones</h2>
+
+        <div class="search-container">
+            <form method="GET" action="{% url 'admin_posts_list' %}" class="search-form">
+                <input type="text" name="q" class="input-search" 
+                       placeholder="Buscar por contenido o usuario..." 
+                       value="{{ request.GET.q|default:'' }}">
+                <button type="submit" class="btn-search">🔍 Buscar</button>
+                <a href="{% url 'admin_posts_list' %}" class="btn-clear">✖ Limpiar</a>
+            </form>
+
+            <div class="export-btns">
+                <a href="{% url 'export_posts_excel' %}" class="btn-export excel">📗 Excel</a>
+                <a href="{% url 'export_posts_pdf' %}" class="btn-export pdf">📕 PDF</a>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th>Contenido</th>
+                        <th style="width: 200px; text-align: center;">Multimedia (Revisión)</th>
+                        <th>Fecha Publicación</th>
+                        <th>Usuario</th>
+                        <th style="width: 100px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in posts %}
+                    <tr>
+                        <td style="font-weight: bold; color: #888;">#{{ p.id }}</td>
+                        <td style="max-width: 300px; line-height: 1.4;">{{ p.contenido }}</td>
+                        <td style="display: flex; justify-content: center;">
+                            {% if p.imagen %}
+                                <div class="media-preview">
+                                    {% with filename=p.imagen.url|lower %}
+                                        {% if ".mp4" in filename or ".mov" in filename or ".webm" in filename %}
+                                            <video controls preload="metadata">
+                                                <source src="{{ p.imagen.url }}" type="video/mp4">
+                                                Tu navegador no soporta video.
+                                            </video>
+                                        {% elif ".mp3" in filename or ".wav" in filename or ".ogg" in filename or ".mpeg" in filename %}
+                                            <audio controls style="width:100%;">
+                                                <source src="{{ p.imagen.url }}">
+                                                Tu navegador no soporta audio.
+                                            </audio>
+                                        {% elif ".pdf" in filename %}
+                                            <iframe src="{{ p.imagen.url }}" frameborder="0" style="width:100%; height:220px;" title="PDF preview"></iframe>
+                                        {% elif ".doc" in filename or ".docx" in filename or ".xls" in filename or ".xlsx" in filename %}
+                                            <div class="doc-preview">
+                                                <i class="fa-solid fa-file"></i>
+                                                <div>
+                                                    <a href="{{ p.imagen.url }}" target="_blank" rel="noopener noreferrer">{{ p.imagen.name }}</a>
+                                                    <span>Documento adjunto</span>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <a href="{{ p.imagen.url }}" target="_blank">
+                                                <img src="{{ p.imagen.url }}" alt="Imagen publicación">
+                                            </a>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            {% else %}
+                                <span style="color: #ccc; font-style: italic; font-size: 0.85rem;">Sin adjunto</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #666; font-size: 0.85rem;">
+                            {{ p.fecha_publicacion|date:"d/m/Y" }}<br>
+                            <strong>{{ p.fecha_publicacion|date:"H:i" }}</strong>
+                        </td>
+                        <td style="display:flex; align-items:center; gap:10px;">
+                            <div class="avatar-circle" title="{{ p.usuario_nombre }}">{{ p.usuario_nombre|default:"?"|slice:"0:1"|upper }}</div>
+                            <div style="display:flex; flex-direction:column;">
+                                <span class="user-badge">{{ p.usuario_nombre|default:"Usuario" }}</span>
+                                <div class="user-id">ID: {{ p.usuario_id }}</div>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+    <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+        <a href="{% url 'edit_post' p.id %}" class="btn-action-del" 
+           style="background-color: #4a90e2; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; padding: 8px 12px;">
+            ✏️ <span>Editar</span>
+        </a>
+        
+        <a href="{% url 'delete_post' p.id %}" class="btn-action-del" 
+           style="background-color: #ff6b6b; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; padding: 8px 12px;"
+           onclick="return confirm('¿Estás seguro de eliminar esta publicación definitivamente?')">
+            🗑️ <span>Eliminar</span>
+        </a>
+    </div>
+</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding: 60px; color: #999;">
+                            <div style="font-size: 1.2rem;">No se encontraron publicaciones.</div>
+                            <div style="margin-top: 10px;">Prueba con otro término de búsqueda.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        2026 Tranquil Connect • Panel de Administración
+    </footer>
+
+</body>
+</html>
